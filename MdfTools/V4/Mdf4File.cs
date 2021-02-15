@@ -64,7 +64,7 @@ namespace MdfTools.V4
             Console.WriteLine($"Channels : {ChannelGroups.SelectMany(k => k.Channels).Count()}");
         }
 
-        public static void Bench(string filename)
+        public static void Bench(string filename, bool @short = false)
         {
             Metrics = new PerfMetrics();
             var sw = Stopwatch.StartNew();
@@ -73,28 +73,45 @@ namespace MdfTools.V4
             var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels));
             var elapsed = sw.Elapsed.TotalSeconds;
 
-            Console.WriteLine("-- File Info........");
-            Console.WriteLine($"# Groups in file   : {mf4.ChannelGroups.Count}");
-            Console.WriteLine($"# Groups loaded    : {buffers.Select(k => k.Channel.ChannelGroup).Distinct().Count()}");
-            Console.WriteLine($"# Channels in file : {mf4.ChannelGroups.SelectMany(k => k.Channels).Count()}");
-            Console.WriteLine($"# Channels loaded  : {buffers.Select(k => k.Channel).Distinct().Count()}");
-            Console.WriteLine("-- Data.............");
-            Console.WriteLine($"Raw-bytes loaded   : {FormatUtils.GetBytesReadable(Metrics.CopyRawData.Value0)}");
-            Console.WriteLine($"Zip-bytes loaded   : {FormatUtils.GetBytesReadable(Metrics.ExtractAndTranspose.Value0)}");
-            Console.WriteLine($"Samples loaded     : {FormatUtils.GetBytesReadable(Metrics.SampleReading.Value0, "samples")}");
-            Console.WriteLine($"Read speed         : {FormatUtils.GetBytesReadable((long) (Metrics.SampleReading.Value1 / elapsed))}ps");
-            Console.WriteLine($"Allocations        : {FormatUtils.GetBytesReadable(Metrics.Allocations.Value0)}");
-            Console.WriteLine("-- Times............");
-            Console.WriteLine($"Full load time     : {elapsed:N1}s");
-            Console.WriteLine($"Time opening       : {Metrics.TimeOpening}");
-            Console.WriteLine($"Block creation     : {Metrics.BlockCreation}");
-            Console.WriteLine($"BLI construction   : {Metrics.BlockLoadingInfoConstruction}");
-            Console.WriteLine($"Raw copies         : {Metrics.CopyRawData}");
-            Console.WriteLine($"Inflate/Transpose  : {Metrics.ExtractAndTranspose}");
-            Console.WriteLine($"SampleReading      : {Metrics.SampleReading}");
-            Console.WriteLine($"Allocations        : {Metrics.Allocations}");
-            Console.WriteLine("-- Parser stuff.....");
-            parser.DumpInfo();
+            if (@short)
+            {
+                Console.WriteLine($"{FormatUtils.GetBytesReadable(Metrics.SampleReading.Value0, "samples")}" +
+                                  $" - {FormatUtils.GetBytesReadable(Metrics.SampleReading.Value1, "B")}" +
+                                  $" - {FormatUtils.GetBytesReadable((long)(Metrics.SampleReading.Value1 / elapsed))}ps" +
+                                  $" - {elapsed:n2}s");
+            }
+            else
+            {
+                Console.WriteLine("-- File Info........");
+                Console.WriteLine($"# Groups in file   : {mf4.ChannelGroups.Count}");
+                Console.WriteLine($"# Groups loaded    : {buffers.Select(k => k.Channel.ChannelGroup).Distinct().Count()}");
+                Console.WriteLine($"# Channels in file : {mf4.ChannelGroups.SelectMany(k => k.Channels).Count()}");
+                Console.WriteLine($"# Channels loaded  : {buffers.Select(k => k.Channel).Distinct().Count()}");
+                Console.WriteLine("-- Data.............");
+                Console.WriteLine($"Raw-bytes loaded   : {FormatUtils.GetBytesReadable(Metrics.CopyRawData.Value0)}");
+                Console.WriteLine($"Zip-bytes loaded   : {FormatUtils.GetBytesReadable(Metrics.ExtractAndTranspose.Value0)}");
+                Console.WriteLine($"Samples loaded     : {FormatUtils.GetBytesReadable(Metrics.SampleReading.Value0, "samples")}");
+                Console.WriteLine($"Read speed         : {FormatUtils.GetBytesReadable((long) (Metrics.SampleReading.Value1 / elapsed))}ps");
+                Console.WriteLine($"Allocations        : {FormatUtils.GetBytesReadable(Metrics.Allocations.Value0)}");
+                Console.WriteLine("-- Times............");
+                Console.WriteLine($"Full load time     : {elapsed:N1}s");
+                Console.WriteLine($"Time opening       : {Metrics.TimeOpening}");
+                Console.WriteLine($"Block creation     : {Metrics.BlockCreation}");
+                Console.WriteLine($"BLI construction   : {Metrics.BlockLoadingInfoConstruction}");
+                Console.WriteLine($"Raw copies         : {Metrics.CopyRawData}");
+                Console.WriteLine($"Inflate/Transpose  : {Metrics.ExtractAndTranspose}");
+                Console.WriteLine($"SampleReading      : {Metrics.SampleReading}");
+                Console.WriteLine($"Allocations        : {Metrics.Allocations}");
+                Console.WriteLine("-- Parser stuff.....");
+                parser.DumpInfo();
+            }
+
+            mf4.Dispose();
+
+            for (int i = 0; i < buffers.Length; i++)
+            {
+                buffers[i].Dispose();
+            }
         }
 
         internal class PerfMetrics
