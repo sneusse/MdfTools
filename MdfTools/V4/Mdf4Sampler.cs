@@ -13,7 +13,7 @@ using MdfTools.Shared.Data.Base;
 
 namespace MdfTools.V4
 {
-    public class Mdf4Sampler
+    public class Mdf4Sampler : IDisposable
     {
         public long SampleOffset { get; }
         public long SampleCount { get; }
@@ -178,7 +178,7 @@ namespace MdfTools.V4
 #endif
                 {
                     var grp = grouping.Key;
-                    var smp = Create(grouping, 0, grp.SampleCount);
+                    var smp = CreateForGroup(grouping, 0, grp.SampleCount);
                     stuff.Add(smp);
                 }
 #if RELEASE
@@ -188,9 +188,29 @@ namespace MdfTools.V4
             return stuff.SelectMany(k => k.Buffers).ToArray();
         }
 
-        public static Mdf4Sampler Create(IEnumerable<Mdf4Channel> channels, ulong sampleOffset, ulong sampleCnt)
+        /// <summary>
+        /// This method allocates sample buffers for all given signals
+        /// </summary>
+        /// <remarks>
+        /// All channels must belong to the same channel group. This is not enforced yet.
+        /// You also should dispose the buffers to reclaim your precious memory.
+        /// </remarks>
+        /// <param name="channels">A set of channels</param>
+        /// <param name="firstSample">The first sample (index)</param>
+        /// <param name="sampleCnt">Number of samples to decode</param>
+        /// <returns>A sampler object containing the buffers</returns>
+        public static Mdf4Sampler CreateForGroup(IEnumerable<Mdf4Channel> channels, ulong firstSample, ulong sampleCnt)
         {
-            return new Mdf4Sampler(channels, sampleOffset, sampleCnt);
+            return new Mdf4Sampler(channels, firstSample, sampleCnt);
+        }
+
+        public void Dispose()
+        {
+            for (var index = 0; index < Buffers.Length; index++)
+            {
+                var bufferView = Buffers[index];
+                bufferView.Dispose();
+            }
         }
     }
 }
