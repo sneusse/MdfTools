@@ -39,11 +39,11 @@ namespace MdfTools.V4
 
         private (ValueConversionSpec Val, DisplayConversionSpec Disp) CreateConverters()
         {
-            DisplayConversionSpec display = null;
-            ValueConversionSpec values = null;
+            DisplayConversionSpec display = DisplayConversionSpec.Default;
+            ValueConversionSpec values = ValueConversionSpec.Default;
 
             var c = _cnBlock.Conversion;
-            if (c == null) return (null, null);
+            if (c == null) return (values, display);
 
             //TODO: add cache here?
 
