@@ -1,6 +1,8 @@
-﻿namespace MdfTools.Shared.Data.Base
+﻿using System;
+
+namespace MdfTools.Shared.Data.Base
 {
-    public class BufferView<TDecodable> where TDecodable : IDecodable
+    public class BufferView<TDecodable> : IDisposable where TDecodable : IDecodable
     {
         private readonly SampleBuffer _original;
 
@@ -19,6 +21,11 @@
         public override string ToString()
         {
             return $"{Channel}: {_original.Data.Count} samples";
+        }
+
+        public void Dispose()
+        {
+            _original.Dispose();
         }
     }
 }

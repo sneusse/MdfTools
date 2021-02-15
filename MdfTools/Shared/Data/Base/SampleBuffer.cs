@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MdfTools.Shared.Data.Base
 {
-    public abstract class SampleBuffer
+    public abstract class SampleBuffer : IDisposable
     {
         internal IDecodable Decodable { get; }
         public abstract IList Data { get; }
@@ -14,5 +14,7 @@ namespace MdfTools.Shared.Data.Base
         }
 
         public abstract void Update(Span<byte> raw, ulong offset, ulong sampleStart, uint sampleCount);
+
+        public abstract void Dispose();
     }
 }
