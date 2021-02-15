@@ -1,4 +1,4 @@
-﻿//#define USE_NATIVE_ALLOCATIONS
+﻿#define USE_NATIVE_ALLOCATIONS
 
 using System;
 using System.Collections;
@@ -274,6 +274,7 @@ namespace MdfTools.Shared.Data
             protected IntPtr HeapArray;
             protected long Length;
             public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
+            public unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
 #else
             protected readonly double[] Storage;
             public sealed override IList Data => Storage;
@@ -283,6 +284,7 @@ namespace MdfTools.Shared.Data
             protected readonly ValueConversionSpec Val;
 
             protected readonly int Stride;
+
 
 
             protected NumericBufferBase(IDecodable decodable, long length) : base(decodable)
