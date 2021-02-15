@@ -4,8 +4,17 @@ using System;
 
 namespace MdfTools.Shared
 {
+
+    // this code should be unreachable
+    public class UnexpectedExecutionPath : Exception
+    {
+
+    }
+
     public class Check
     {
+        public static void ThrowUnexpectedExecutionPath() => throw new UnexpectedExecutionPath();
+
         public static void NotImplemented(Exception ex = null)
         {
 #if RELEASE
