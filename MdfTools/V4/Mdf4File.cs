@@ -22,6 +22,8 @@ namespace MdfTools.V4
 
         public IReadOnlyList<Mdf4ChannelGroup> ChannelGroups => ChannelGroupsInternal;
 
+        public IEnumerable<Mdf4Channel> Channels => ChannelGroups.SelectMany(k => k.Channels);
+
         internal Mdf4HDBlock Header => Mdf4Parser.GetBlock<Mdf4HDBlock>(64);
 
         public string Filename { get; }

@@ -18,6 +18,8 @@ namespace MdfTools.V4
         public string Source => _cnBlock.Source?.SourceName;
         public Mdf4ChannelGroup ChannelGroup { get; }
 
+        public Mdf4Channel Master => ChannelGroup.MasterChannel;
+
         internal Mdf4Channel(Mdf4ChannelGroup channelGroup, Mdf4CNBlock cnBlock)
         {
             ChannelGroup = channelGroup;
