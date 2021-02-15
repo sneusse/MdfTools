@@ -1,7 +1,7 @@
-﻿
-// With managed allocations of very long channels
+﻿// With managed allocations of very long channels
 // the large object heap gets filled quite fast
 // when loading multiple large files.
+
 #define USE_NATIVE_ALLOCATIONS
 
 using System;
@@ -65,114 +65,106 @@ namespace MdfTools.Shared.Data
             {
                 var str = (int) (offset + (ulong) Raw.TotalByteOffset);
 #if USE_NATIVE_ALLOCATIONS
-                double* Storage = (double*)HeapArray.ToPointer();
+                double* Storage = (double*) HeapArray.ToPointer();
 #endif
-
-                switch (Raw.NativeType)
+                unchecked
                 {
-                case NativeType.NotNative:
-                    Check.ThrowUnexpectedExecutionPath();
-                    break;
-                case NativeType.UInt8:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                    switch (Raw.NativeType)
                     {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((byte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                    case NativeType.NotNative:
+                        Check.ThrowUnexpectedExecutionPath();
+                        break;
+                    case NativeType.UInt8:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((byte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.UInt16:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((ushort) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.UInt16:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((ushort) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.UInt32:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((uint) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.UInt32:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((uint) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.UInt64:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((ulong) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.UInt64:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((ulong) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Int8:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((sbyte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Int8:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((sbyte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Int16:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((short) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Int16:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((short) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Int32:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((int) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Int32:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((int) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Int64:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<ulong>(ref bytes);
-                        Storage[i] = ((long) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Int64:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            Storage[i] = ((long) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Float:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<float>(ref bytes);
-                        Storage[i] = value * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Float:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<float>(ref raw[str]);
+                            Storage[i] = value * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
-                case NativeType.Double:
-                    for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
-                    {
-                        ref var bytes = ref raw[str];
-                        var value = Unsafe.ReadUnaligned<double>(ref bytes);
-                        Storage[i] = value * _conv.Scale + _conv.Offset;
-                        str += Stride;
-                    }
+                        break;
+                    case NativeType.Double:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<double>(ref raw[str]);
+                            Storage[i] = value * _conv.Scale + _conv.Offset;
+                            str += Stride;
+                        }
 
-                    break;
+                        break;
+                    }
                 }
             }
         }
@@ -193,7 +185,6 @@ namespace MdfTools.Shared.Data
             protected readonly ValueConversionSpec Val;
 
             protected readonly int Stride;
-
 
 
             protected NumericBufferBase(IDecodable decodable, long length) : base(decodable)
