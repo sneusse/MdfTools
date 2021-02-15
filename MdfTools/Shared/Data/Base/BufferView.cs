@@ -18,6 +18,11 @@ namespace MdfTools.Shared.Data.Base
             return (T[]) _original.Data;
         }
 
+        public Span<T> GetSpan<T>()
+        {
+            return ((SampleBuffer<T>) _original).Span;
+        }
+
         public override string ToString()
         {
             return $"{Channel}: {_original.Data.Count} samples";

@@ -17,4 +17,13 @@ namespace MdfTools.Shared.Data.Base
 
         public abstract void Dispose();
     }
+
+    public abstract class SampleBuffer<T> : SampleBuffer
+    {
+        protected SampleBuffer(IDecodable decodable) : base(decodable)
+        {
+        }
+
+        public abstract Span<T> Span { get; }
+    }
 }

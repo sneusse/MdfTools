@@ -166,6 +166,9 @@ namespace MdfTools.V4
             }
         }
 
+        public static BufferView<Mdf4Channel>[] LoadFull(params Mdf4Channel[] channels)
+            => LoadFull((IEnumerable<Mdf4Channel>)channels);
+        
         public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);

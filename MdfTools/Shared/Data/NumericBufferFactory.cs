@@ -169,13 +169,13 @@ namespace MdfTools.Shared.Data
             }
         }
 
-        private abstract class NumericBufferBase : SampleBuffer, IDisposable
+        private abstract class NumericBufferBase : SampleBuffer<double>, IDisposable
         {
 #if USE_NATIVE_ALLOCATIONS
-            protected IntPtr HeapArray;
-            protected long Length;
+            protected readonly IntPtr HeapArray;
+            protected readonly long Length;
             public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
-            public unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
+            public override unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
 #else
             protected readonly double[] Storage;
             public sealed override IList Data => Storage;
