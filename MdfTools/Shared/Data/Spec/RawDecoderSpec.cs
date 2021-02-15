@@ -35,6 +35,8 @@ namespace MdfTools.Shared.Data.Spec
         public DataType DataType { get; }
         public bool IsNumeric { get; }
 
+        public NativeType NativeType { get; }
+
         public RawDecoderSpec(uint stride, int byteOffset, int bitOffset, int bitLength, ByteOrder byteOrder,
                               DataType dataType)
         {
@@ -44,6 +46,7 @@ namespace MdfTools.Shared.Data.Spec
             BitLength = bitLength;
             ByteOrder = byteOrder;
             DataType = dataType;
+            NativeType = GetNativeType();
 
             TotalByteOffset = byteOffset + bitOffset / 8;
             Shift = bitOffset % 8;
@@ -80,38 +83,31 @@ namespace MdfTools.Shared.Data.Spec
             }
         }
 
-        public Type GetStorageType()
+
+        private NativeType GetNativeType()
         {
             switch (DataType)
             {
             case DataType.Unsigned:
-                if (BitLength <= 8) return typeof(byte);
-                if (BitLength <= 16) return typeof(ushort);
-                if (BitLength <= 32) return typeof(uint);
-                if (BitLength <= 64) return typeof(ulong);
-
+                if (BitLength <= 8) return NativeType.UInt8;
+                if (BitLength <= 16) return NativeType.UInt16;
+                if (BitLength <= 32) return NativeType.UInt32;
+                if (BitLength <= 64) return NativeType.UInt64;
                 break;
             case DataType.Signed:
-                if (BitLength <= 8) return typeof(sbyte);
-                if (BitLength <= 16) return typeof(short);
-                if (BitLength <= 32) return typeof(int);
-                if (BitLength <= 64) return typeof(long);
-
+                if (BitLength <= 8) return NativeType.Int8;
+                if (BitLength <= 16) return NativeType.Int16;
+                if (BitLength <= 32) return NativeType.Int32;
+                if (BitLength <= 64) return NativeType.Int64;
                 break;
             case DataType.Float:
                 if (BitLength <= 16) throw new NotImplementedException("Float16");
-                if (BitLength <= 32) return typeof(float);
-                if (BitLength <= 64) return typeof(double);
+                if (BitLength <= 32) return NativeType.Float;
+                if (BitLength <= 64) return NativeType.Double;
                 break;
-            case DataType.AnsiString:
-                return typeof(string);
-            case DataType.ByteArray:
-                return typeof(byte[]);
-            case DataType.Bool:
-                return typeof(bool);
             }
 
-            throw new NotImplementedException($"{DataType} has unknown storage");
+            return NativeType.NotNative;
         }
     }
 }

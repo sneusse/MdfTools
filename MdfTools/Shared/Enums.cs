@@ -1,5 +1,20 @@
 ﻿namespace MdfTools.Shared
 {
+    public enum NativeType
+    {
+        NotNative,
+        UInt8,
+        UInt16,
+        UInt32,
+        UInt64,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        Float,
+        Double
+    }
+
     public enum DataType
     {
         Unknown,
