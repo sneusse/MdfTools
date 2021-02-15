@@ -57,6 +57,11 @@ namespace MdfTools.Shared.Data
                     str += (int) _raw.Stride;
                 }
             }
+
+            public override void Dispose()
+            {
+                
+            }
         }
 
         private sealed class ByteBuffer : SampleBuffer
@@ -80,6 +85,11 @@ namespace MdfTools.Shared.Data
                                      (uint) byteLength);
                     offset += Decodable.DecoderSpec.RawDecoderSpec.Stride;
                 }
+            }
+
+            public override void Dispose()
+            {
+                
             }
         }
 
