@@ -1,4 +1,8 @@
-﻿#define USE_NATIVE_ALLOCATIONS
+﻿
+// With managed allocations of very long channels
+// the large object heap gets filled quite fast
+// when loading multiple large files.
+#define USE_NATIVE_ALLOCATIONS
 
 using System;
 using System.Collections;
