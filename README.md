@@ -89,4 +89,58 @@ A MDF 4.x Reader (for now)
 
 ```
 
+* Use The `Mdf4File.Bench("foo.mf4");` to get a little bench/stats output
+
+```
+
+-- File Info........
+# Groups in file   : 112
+# Groups loaded    : 112
+# Channels in file : 3777
+# Channels loaded  : 3777
+-- Data.............
+Raw-bytes loaded   : 2,614 GB
+Zip-bytes loaded   : 0 B
+Samples loaded     : 22,809 Msamples
+Read speed         : 1,158 GBps
+Allocations        : 8,828 GB
+-- Times............
+Full load time     : 2,3s
+Time opening       : CPU:3ms RT: 11066ms-11069ms
+Block creation     : CPU:59ms RT: 11066ms-11160ms
+BLI construction   : CPU:55ms RT: 11069ms-11124ms
+Raw copies         : CPU:2638ms RT: 11161ms-13321ms
+Inflate/Transpose  : CPU:0ms RT: -1ms--1ms
+SampleReading      : CPU:10169ms RT: 11161ms-13321ms
+Allocations        : CPU:114ms RT: 11161ms-13320ms
+-- Parser stuff.....
+Format version 4.0
+Block MdfBlockCA: 0 (zipped: 0)
+Block MdfBlockCC: 637 (zipped: 0)
+Block MdfBlockHD: 1 (zipped: 0)
+Block MdfBlockLD: 0 (zipped: 0)
+Block MdfBlockMD: 3780 (zipped: 0)
+Block MdfBlockRD: 0 (zipped: 0)
+Block MdfBlockSD: 0 (zipped: 0)
+Block MdfBlockCG: 112 (zipped: 0)
+Block MdfBlockDG: 112 (zipped: 0)
+Block MdfBlockCH: 0 (zipped: 0)
+Block MdfBlockFH: 2 (zipped: 0)
+Block MdfBlockDI: 0 (zipped: 0)
+Block MdfBlockRI: 0 (zipped: 0)
+Block MdfBlockSI: 3889 (zipped: 0)
+Block MdfBlockDL: 154 (zipped: 0)
+Block MdfBlockHL: 0 (zipped: 0)
+Block MdfBlockCN: 3777 (zipped: 0)
+Block MdfBlockSR: 0 (zipped: 0)
+Block MdfBlockAT: 0 (zipped: 0)
+Block MdfBlockDT: 19480 (zipped: 0)
+Block MdfBlockDV: 0 (zipped: 0)
+Block MdfBlockEV: 1 (zipped: 0)
+Block MdfBlockRV: 0 (zipped: 0)
+Block MdfBlockTX: 21625 (zipped: 0)
+Block MdfBlockDZ: 0 (zipped: 0)
+
+```
+
 
