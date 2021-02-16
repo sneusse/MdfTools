@@ -16,6 +16,7 @@ A MDF 4.x Reader (for now)
   * Reading and writing MDF files is so fundamentally different that it makes sense to implement it separately
 * Anything but "Numeric-Channels" (read: what is convertable to double)
   * Helpers to get Enum-Strings etc. might be added
+* Reading unsorted files
 
 ## Design choices
 
