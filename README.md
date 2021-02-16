@@ -53,7 +53,8 @@ A MDF 4.x Reader (for now)
 
 * SR, RD, RV, RI Blocks
   * Only relevant for plotting.
-  * Could be calculated on the fly if neccessary.
+  * Not avaliable in all measurements so a fallback has to be implemented anyway.
+  * Can calculated on the fly if neccessary.
   
 # Roadmap
 
@@ -62,3 +63,29 @@ A MDF 4.x Reader (for now)
 * [ ] Add time based sample access
 * [ ] Port the LOD Buffer to .NET?
 * [ ] Support MDF 3.x
+
+# How To use
+
+* Clone this repo, reference the project in your solution.
+
+```csharp
+
+  static void Main(string[] args)
+  {
+      using var mf4 = Mdf4File.Open("cool_measurements.mf4");
+      var example = mf4
+                    .Channels
+                    .FirstOrDefault(k => k.Name.ToLower().Contains("rpm_channel"));
+
+
+      var samples = Mdf4Sampler.LoadFull(example, example.Master);
+
+      var data = samples[0].GetSpan<double>();
+      var time = samples[1].GetSpan<double>();
+
+      // use the samples for something.
+  }
+
+```
+
+
