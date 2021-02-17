@@ -64,7 +64,9 @@ A MDF 4.x Reader (for now)
   
 # Roadmap
 
-* [ ] Validate some example files
+* [x] Validate some example files
+* [ ] Add option to disable/limit/set threading
+* [ ] Maybe do an alternative stream interface for remote files?
 * [ ] Implement missing blocks
 * [ ] Add time based sample access
 * [ ] Port the LOD Buffer to .NET?
