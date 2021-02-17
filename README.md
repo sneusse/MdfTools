@@ -2,6 +2,11 @@
 
 A MDF 4.x Reader (for now)
 
+3 flavours:
+- .NET Core/.NET 5
+- .NET 4
+- MATLAB (proxy using .NET 4)
+
 ## Goals
 
 * Reading MDF 4.x
