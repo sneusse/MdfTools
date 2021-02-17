@@ -2,8 +2,6 @@
 // the large object heap gets filled quite fast
 // when loading multiple large files.
 
-#define USE_NATIVE_ALLOCATIONS
-
 using System;
 using System.Collections;
 using System.Net.Http.Headers;
@@ -179,6 +177,7 @@ namespace MdfTools.Shared.Data
 #else
             protected readonly double[] Storage;
             public sealed override IList Data => Storage;
+            public override Span<double> Span => Storage.AsSpan();
 #endif
 
             protected readonly RawDecoderSpec Raw;
