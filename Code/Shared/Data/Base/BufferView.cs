@@ -1,36 +1,37 @@
 ﻿using System;
+using MdfTools.Shared.Data.Spec;
 
 namespace MdfTools.Shared.Data.Base
 {
     public class BufferView<TDecodable> : IDisposable where TDecodable : IDecodable
     {
-        private readonly SampleBuffer _original;
+        public SampleBuffer Original { get; }
 
-        public TDecodable Channel => (TDecodable) _original.Decodable;
+        public TDecodable Channel => (TDecodable) Original.Decodable;
 
         public BufferView(SampleBuffer original)
         {
-            _original = original;
+            Original = original;
         }
 
         public T[] GetData<T>()
         {
-            return (T[]) _original.Data;
+            return (T[]) Original.Data;
         }
 
         public Span<T> GetSpan<T>()
         {
-            return ((SampleBuffer<T>) _original).Span;
+            return ((SampleBuffer<T>) Original).Span;
         }
 
         public override string ToString()
         {
-            return $"{Channel}: {_original.Data.Count} samples";
+            return $"{Channel}: {Original.Data.Count} samples";
         }
 
         public void Dispose()
         {
-            _original.Dispose();
+            Original.Dispose();
         }
     }
 }

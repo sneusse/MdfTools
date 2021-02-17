@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Check.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\BufferView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\IDecodable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\LodBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBufferExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBufferFactory.cs" />

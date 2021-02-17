@@ -166,70 +166,69 @@ namespace MdfTools.Shared.Data
                 }
             }
         }
+    }
 
-        private abstract class NumericBufferBase : SampleBuffer<double>, IDisposable
-        {
+    public abstract class NumericBufferBase : SampleBuffer<double>, IDisposable
+    {
 #if USE_NATIVE_ALLOCATIONS
-            protected readonly IntPtr HeapArray;
-            protected readonly long Length;
-            public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
-            public override unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
+        internal readonly IntPtr HeapArray;
+        protected readonly long Length;
+        public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
+        public override unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
 #else
             protected readonly double[] Storage;
             public sealed override IList Data => Storage;
             public override Span<double> Span => Storage.AsSpan();
 #endif
 
-            protected readonly RawDecoderSpec Raw;
-            protected readonly ValueConversionSpec Val;
+        protected readonly RawDecoderSpec Raw;
+        protected readonly ValueConversionSpec Val;
 
-            protected readonly int Stride;
+        protected readonly int Stride;
 
 
-            protected NumericBufferBase(IDecodable decodable, long length) : base(decodable)
-            {
+        protected NumericBufferBase(IDecodable decodable, long length) : base(decodable)
+        {
 #if USE_NATIVE_ALLOCATIONS
-                Length = length;
-                HeapArray = Marshal.AllocHGlobal((IntPtr) (length * 8));
+            Length = length;
+            HeapArray = Marshal.AllocHGlobal((IntPtr) (length * 8));
 #else
                 Storage = new double[length];
 #endif
-                var decoder = decodable.DecoderSpec;
-                Raw = decoder.RawDecoderSpec;
-                Val = decoder.ValueConversionSpec;
-                Stride = (int) Raw.Stride;
-            }
+            var decoder = decodable.DecoderSpec;
+            Raw = decoder.RawDecoderSpec;
+            Val = decoder.ValueConversionSpec;
+            Stride = (int) Raw.Stride;
+        }
 
-            public virtual void DisableConversion()
-            {
-            }
+        public virtual void DisableConversion()
+        {
+        }
 
-            private void ReleaseUnmanagedResources()
-            {
-                // TODO release unmanaged resources here
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                ReleaseUnmanagedResources();
-                if (disposing)
-                {
+        private void ReleaseUnmanagedResources()
+        {
 #if USE_NATIVE_ALLOCATIONS
-                    Marshal.FreeHGlobal(HeapArray);
+            Marshal.FreeHGlobal(HeapArray);
 #endif
-                }
-            }
+        }
 
-            public override void Dispose()
+        protected virtual void Dispose(bool disposing)
+        {
+            ReleaseUnmanagedResources();
+            if (disposing)
             {
-                Dispose(true);
-                GC.SuppressFinalize(this);
             }
+        }
 
-            ~NumericBufferBase()
-            {
-                Dispose(false);
-            }
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~NumericBufferBase()
+        {
+            Dispose(false);
         }
     }
 }
