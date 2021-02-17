@@ -74,7 +74,7 @@ namespace MdfTools.Shared.Data.Base
                     layer[idx] = (t1 + t0) / 2;
 
                     // alignment lost
-                    if ((idx & 1) == 1)
+                    if ((idx & 1) == 0)
                         break;
 
                     prevIdx = idx;
@@ -111,7 +111,7 @@ namespace MdfTools.Shared.Data.Base
                     layer.Last = next;
 
                     // alignment lost
-                    if ((idx & 1) == 1)
+                    if ((idx & 1) == 0)
                         break;
 
                     prevIdx = idx;
