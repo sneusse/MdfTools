@@ -60,7 +60,7 @@ A MDF 4.x Reader (for now)
 * SR, RD, RV, RI Blocks
   * Only relevant for plotting.
   * Not avaliable in all measurements so a fallback has to be implemented anyway.
-  * Can calculated on the fly if neccessary.
+  * Can be calculated on the fly if neccessary.
   
 # Roadmap
 
