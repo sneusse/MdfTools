@@ -86,7 +86,7 @@ namespace MdfTools.V4
 
                     //TODO: find better metric -.-
                     var threadMetric = bli.SampleCount * channels.Length;
-                    var threadCount = (int) Math.Ceiling(threadMetric / 1000000000.0);
+                    var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
 
 #if PARALLEL
                     //NORMAL VERSION
@@ -167,9 +167,9 @@ namespace MdfTools.V4
         }
 
         public static BufferView<Mdf4Channel>[] LoadFull(params Mdf4Channel[] channels)
-            => LoadFull((IEnumerable<Mdf4Channel>)channels);
-        
-        public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels)
+            => LoadFull((IEnumerable<Mdf4Channel>) channels);
+
+        public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
@@ -181,7 +181,9 @@ namespace MdfTools.V4
 #endif
                 {
                     var grp = grouping.Key;
-                    var smp = CreateForGroup(grouping, 0, grp.SampleCount);
+                    sampleLimit = sampleLimit == -1 ? (long) grp.SampleCount : sampleLimit;
+
+                    var smp = CreateForGroup(grouping, 0, (ulong) sampleLimit);
                     stuff.Add(smp);
                 }
 #if RELEASE
