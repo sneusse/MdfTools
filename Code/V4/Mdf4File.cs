@@ -66,13 +66,13 @@ namespace MdfTools.V4
             Console.WriteLine($"Channels : {ChannelGroups.SelectMany(k => k.Channels).Count()}");
         }
 
-        public static void Bench(string filename, bool @short = false)
+        public static void Bench(string filename, bool @short = false, long sampleLimit = -1)
         {
             Metrics = new PerfMetrics();
             var sw = Stopwatch.StartNew();
             var parser = new Mdf4Parser(filename);
             var mf4 = parser.Open().PrepareForMultiThreading();
-            var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels));
+            var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
             var elapsed = sw.Elapsed.TotalSeconds;
 
             if (@short)
@@ -170,6 +170,11 @@ namespace MdfTools.V4
                     return $"CPU:{TotalCpuTime}ms RT: {FirstCall}ms-{LastReturn}ms";
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return Filename;
         }
     }
 }
