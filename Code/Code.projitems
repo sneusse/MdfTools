@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>ac1365a1-4fca-4d92-8a1d-5bf456b05a51</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Code</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Native\LibDeflate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scratch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Check.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\BufferView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\IDecodable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBufferExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\SampleBufferFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\DefaultSampleBufferFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\NumericBufferFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Spec\DisplayConversionSpec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Spec\RawDecoderSpec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Spec\ValueConversionSpec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Spec\ValueDecoderSpec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Enums.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\MdfBufferPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\FastBinaryReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\FormatUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\NativeTypeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\UnknownArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\UnsafeData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Helpers\AlignmentInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Helpers\BlockLoadingInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4Blocks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4Channel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4ChannelGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4File.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4Parser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)V4\Mdf4Sampler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)libdeflate_x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

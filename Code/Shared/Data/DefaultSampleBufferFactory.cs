@@ -52,7 +52,7 @@ namespace MdfTools.Shared.Data
                 var str = (int) (offset + (ulong) _raw.TotalByteOffset);
                 for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                 {
-                    var value = Encoding.Default.GetString(raw.Slice(str, _raw.TotalByteLength));
+                    var value = Encoding.Default.GetString(raw.Slice(str, _raw.TotalByteLength).ToArray());
                     _storage[i] = value;
                     str += (int) _raw.Stride;
                 }
