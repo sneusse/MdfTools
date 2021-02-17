@@ -80,7 +80,11 @@ namespace MdfTools.V4
             Debug.Assert(gapBufferIndex % RecordLength == 0);
 
             var gapRecords = (int) (gapBufferIndex / RecordLength);
-            GapBuffer = new byte[gapBufferIndex]; // last index == length 
+
+            // allocate 'a little bit more' as we always read 8 bytes
+            if (gapBufferIndex > 0)
+                GapBuffer = new byte[gapBufferIndex + 8]; // last index == length 
+
             GapIndexToSampleIndex = indices.ToArray();
 
             return infos;

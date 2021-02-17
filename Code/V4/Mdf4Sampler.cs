@@ -80,7 +80,8 @@ namespace MdfTools.V4
                     var bli = blis[i];
                     var blk = bli.Block;
 
-                    var recordBuffer = MdfBufferPool.Rent(blk.ByteLength);
+                    // allocate 'a little bit more' as we always read 8 bytes
+                    var recordBuffer = MdfBufferPool.Rent(blk.ByteLength + 8);
                     blk.CopyTo(recordBuffer, 0);
                     bli.CopyGaps(recordBuffer, src.GapBuffer);
 
