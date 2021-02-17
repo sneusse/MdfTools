@@ -20,6 +20,12 @@ namespace MdfTools.V4
 
         public Mdf4Channel Master => ChannelGroup.MasterChannel;
 
+        protected Mdf4Channel(Mdf4Channel adapter)
+        {
+            ChannelGroup = adapter.ChannelGroup;
+            _cnBlock = adapter._cnBlock;
+        }
+
         internal Mdf4Channel(Mdf4ChannelGroup channelGroup, Mdf4CNBlock cnBlock)
         {
             ChannelGroup = channelGroup;
