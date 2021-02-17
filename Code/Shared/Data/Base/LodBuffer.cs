@@ -6,10 +6,11 @@ using MdfTools.V4;
 
 namespace MdfTools.Shared.Data.Base
 {
-    public class LodBuffer
+    public class LodBuffer : IDisposable
     {
         public readonly SampleBuffer<double> Original;
         public readonly LodLayer[] LodLayers;
+        private bool _disposedValue;
 
         private LodBuffer(SampleBuffer<double> original, List<LodLayer> layers)
         {
@@ -133,6 +134,31 @@ namespace MdfTools.Shared.Data.Base
                 Length = sampls;
                 Last = 0;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                }
+
+                if (LodLayers.Length > 1)
+                    Marshal.FreeHGlobal(LodLayers[1].Ptr);
+                _disposedValue = true;
+            }
+        }
+
+       ~LodBuffer()
+        {
+             Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
