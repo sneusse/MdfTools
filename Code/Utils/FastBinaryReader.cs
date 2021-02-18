@@ -93,6 +93,7 @@ namespace MdfTools.Utils
         }
         internal T[] ReadArray<T>(long position, int length) where T : struct
         {
+            Position = position;
             var r = new T[length];
             ReadArray(ref r);
             return r;
