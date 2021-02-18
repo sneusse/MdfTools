@@ -10,8 +10,6 @@ namespace MdfTools.V4
         private readonly List<Mdf4Block> _allBlocks = new List<Mdf4Block>();
         private readonly Dictionary<long, Mdf4Block> _blockCache = new Dictionary<long, Mdf4Block>();
 
-
-        private readonly Queue<Mdf4Block> _blockReader = new Queue<Mdf4Block>();
         internal readonly Mdf4File Mdf4File;
 
         public FastBinaryReader Reader { get; }
@@ -35,7 +33,6 @@ namespace MdfTools.V4
             // do something with id stuff which is quite useless.
             // maybe branch to mdf3?<
             ref var rawIdBlock = ref Reader.GetRaw<IDBlockRaw>(0);
-
 
             var header = GetBlock<Mdf4HDBlock>(64);
 

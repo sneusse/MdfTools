@@ -53,6 +53,12 @@ namespace MdfTools.V4
         DistanceValues = 1 << 3
     }
 
+    [Flags]
+    public enum TimeFlags : byte
+    {
+        LocalTime = 1 << 0,
+        OffsetsValid = 1 << 1
+    }
 
     internal readonly struct DataBlockMap
     {
@@ -173,7 +179,7 @@ namespace MdfTools.V4
 
                 // unmanaged version is ~ factor 2 faster
                 LibDeflateDecompress.Decompress(compressedData, Data.CompressedDataLength, transposedData,
-                                                Data.UncompressedDataLength);
+                    Data.UncompressedDataLength);
 
                 // overhead for basically everything I have right now is bigger than the speedup.
                 // maybe if we have some files with 2/4/8MB blocks? Test when we have such a file.
@@ -217,7 +223,7 @@ namespace MdfTools.V4
                 var compressedData = Reader.GetRawPointer(ZippedDataOffset);
                 var destBuffer = fullBuffer.AsSpan(offset);
                 LibDeflateDecompress.Decompress(compressedData, Data.CompressedDataLength, destBuffer,
-                                                Data.UncompressedDataLength);
+                    Data.UncompressedDataLength);
             }
 
             #region Managed version
@@ -299,7 +305,7 @@ namespace MdfTools.V4
                 if (mdfDlBlock.EqualLength > 0)
                     for (uint i = 0; i < mdfDlBlock.BlockCount; i++)
                         yield return new DataBlockMap(mdfDlBlock.Links[i + 1], (long) (i * mdfDlBlock.EqualLength),
-                                                      Parser);
+                            Parser);
                 else
                     for (uint i = 0; i < mdfDlBlock.BlockCount; i++)
                         yield return new DataBlockMap(mdfDlBlock.Links[i + 1], mdfDlBlock.BlockOffsets[i], Parser);
@@ -673,6 +679,55 @@ namespace MdfTools.V4
         }
     }
 
+    public interface IMdf4FileHistory
+    {
+        string Comment { get; }
+        Mdf4FHBlockData Data { get; }
+        DateTime FileTime { get; }
+        XElement XComment { get; }
+    }
+
+    public struct Mdf4FHBlockData
+    {
+        public ulong FileTimeNs;
+        public ushort TimeZoneOffsetMinutes;
+        public ushort DstOffsetMinutes;
+
+        public TimeFlags Flags;
+        // 3 reserved bytes, who cares.
+    }
+
+    internal class Mdf4FHBlock : Mdf4Block<Mdf4FHBlockData>, IMdf4FileHistory
+    {
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        internal Mdf4TXBlock Comment => LinkTo<Mdf4TXBlock>(1);
+        Mdf4FHBlockData IMdf4FileHistory.Data => Data;
+        string IMdf4FileHistory.Comment => Comment;
+        public XElement XComment => XElement.Parse(Comment);
+
+        public DateTime FileTime
+        {
+            get
+            {
+                var date = Epoch.AddMilliseconds(Data.FileTimeNs / 1000000.0);
+
+
+                if (Data.Flags.HasFlag(TimeFlags.OffsetsValid))
+                {
+                    date.AddMinutes(Data.DstOffsetMinutes).AddMinutes(Data.TimeZoneOffsetMinutes);
+                }
+
+                return date;
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{((IMdf4FileHistory) this).Comment}";
+        }
+    }
+
     internal class Mdf4HDBlock : Mdf4Block<Mdf4HDBlock.Raw>
     {
         [Flags]
@@ -697,6 +752,7 @@ namespace MdfTools.V4
         }
 
         internal IEnumerable<Mdf4DGBlock> DGBlocks => GetIterator<Mdf4DGBlock>(0);
+        internal IEnumerable<Mdf4FHBlock> FHBlocks => GetIterator<Mdf4FHBlock>(1);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Raw
@@ -781,7 +837,7 @@ namespace MdfTools.V4
                 block = new Mdf4Block();
                 break;
             case BlockId.MdfBlockFH:
-                block = new Mdf4Block();
+                block = new Mdf4FHBlock();
                 break;
             case BlockId.MdfBlockHD:
                 block = new Mdf4HDBlock();
@@ -887,11 +943,6 @@ namespace MdfTools.V4
         {
             return Offset.GetHashCode();
         }
-
-        // protected IEnumerable<T> GetIterator<T>(long firstOffset) where T : Mdf4Block
-        // {
-        //     return new BlockIterator<T>(firstOffset, Parser);
-        // }
 
         private class BlockIterator<T> : IEnumerable<T> where T : Mdf4Block
         {
