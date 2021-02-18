@@ -28,8 +28,8 @@
 
     public enum ByteOrder
     {
-        Intel,
-        Motorola,
+        LittleEndian,
+        BigEndian,
         Default,
         Undefined
     }

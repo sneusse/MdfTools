@@ -185,23 +185,23 @@ namespace MdfTools.V4
             switch (data.DataType)
             {
             case Mdf4CNBlock.ChannelDataType.UnsignedLittleEndian:
-                byteOrder = ByteOrder.Intel;
+                byteOrder = ByteOrder.LittleEndian;
                 dataType = DataType.Unsigned;
                 break;
             case Mdf4CNBlock.ChannelDataType.UnsignedBigEndian:
-                byteOrder = ByteOrder.Motorola;
+                byteOrder = ByteOrder.BigEndian;
                 dataType = DataType.Unsigned;
                 break;
             case Mdf4CNBlock.ChannelDataType.SignedLittleEndian:
-                byteOrder = ByteOrder.Intel;
+                byteOrder = ByteOrder.LittleEndian;
                 dataType = DataType.Signed;
                 break;
             case Mdf4CNBlock.ChannelDataType.SignedBigEndian:
-                byteOrder = ByteOrder.Motorola;
+                byteOrder = ByteOrder.BigEndian;
                 dataType = DataType.Signed;
                 break;
             case Mdf4CNBlock.ChannelDataType.FloatLittleEndian:
-                byteOrder = ByteOrder.Intel;
+                byteOrder = ByteOrder.LittleEndian;
                 dataType = DataType.Float;
                 break;
             case Mdf4CNBlock.ChannelDataType.FloatBigEndian:
