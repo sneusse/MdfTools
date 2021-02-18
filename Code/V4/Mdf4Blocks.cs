@@ -86,7 +86,7 @@ namespace MdfTools.V4
         public IEnumerable<DataBlockMap> GetBlockMap();
     }
 
-    internal class MdfDTBlock : Mdf4DataBlock, IMdf4DataRoot
+    internal class Mdf4DTBlock : Mdf4DataBlock, IMdf4DataRoot
     {
         public override long ByteLength => BlockDataLength;
 
@@ -129,7 +129,7 @@ namespace MdfTools.V4
         }
     }
 
-    internal class MdfDZBlock : Mdf4DataBlock
+    internal class Mdf4DZBlock : Mdf4DataBlock
     {
         public enum ZLibCompressionInfo : byte
         {
@@ -272,14 +272,14 @@ namespace MdfTools.V4
         }
     }
 
-    internal class MdfDLBlock : Mdf4Block, IMdf4DataRoot
+    internal class Mdf4DLBlock : Mdf4Block, IMdf4DataRoot
     {
         private uint _blockCount;
         public long[] BlockOffsets;
         public ulong EqualLength;
 
         public ListFlags Flags;
-        public IEnumerable<MdfDLBlock> DlBlocksWithSelf => GetIterator(this);
+        public IEnumerable<Mdf4DLBlock> DlBlocksWithSelf => GetIterator(this);
         public IEnumerable<Mdf4DataBlock> DataBlocks => Links.Skip(1).Select(k => Parser.GetBlock<Mdf4DataBlock>(k));
 
         public UnknownArray Time { get; private set; }
@@ -335,11 +335,11 @@ namespace MdfTools.V4
         }
     }
 
-    internal class MdfHLBlock : Mdf4Block, IMdf4DataRoot
+    internal class Mdf4HLBlock : Mdf4Block, IMdf4DataRoot
     {
         public ListFlags Flags;
         public ZipType ZipType;
-        public MdfDLBlock FirstDlBlock => LinkTo<MdfDLBlock>(0);
+        public Mdf4DLBlock FirstDlBlock => LinkTo<Mdf4DLBlock>(0);
 
         public IEnumerable<Mdf4DataBlock> GetAllDataBlocks()
         {
@@ -766,16 +766,16 @@ namespace MdfTools.V4
                 block = new Mdf4Block();
                 break;
             case BlockId.MdfBlockDL:
-                block = new MdfDLBlock();
+                block = new Mdf4DLBlock();
                 break;
             case BlockId.MdfBlockDT:
-                block = new MdfDTBlock();
+                block = new Mdf4DTBlock();
                 break;
             case BlockId.MdfBlockDV:
                 block = new Mdf4Block();
                 break;
             case BlockId.MdfBlockDZ:
-                block = new MdfDZBlock();
+                block = new Mdf4DZBlock();
                 break;
             case BlockId.MdfBlockEV:
                 block = new Mdf4Block();
@@ -787,7 +787,7 @@ namespace MdfTools.V4
                 block = new Mdf4HDBlock();
                 break;
             case BlockId.MdfBlockHL:
-                block = new MdfHLBlock();
+                block = new Mdf4HLBlock();
                 break;
             case BlockId.MdfBlockLD:
                 block = new Mdf4Block();
