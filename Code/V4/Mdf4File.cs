@@ -51,6 +51,7 @@ namespace MdfTools.V4
             return new Mdf4Parser(filename).Open();
         }
 
+        // actually not needed anymore as the reader is thread safe now.
         public Mdf4File PrepareForMultiThreading()
         {
             // block map

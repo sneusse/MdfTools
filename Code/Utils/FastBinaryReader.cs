@@ -85,32 +85,17 @@ namespace MdfTools.Utils
             Position += Unsafe.SizeOf<T>();
         }
 
-        internal T Read<T>() where T : struct
-        {
-            _view.Read(Position, out T ret);
-            Position += Marshal.SizeOf<T>();
-            return ret;
-        }
-
-        internal T Read<T>(long position) where T : struct
-        {
-            _view.Read(position, out T ret);
-            Position = position + Marshal.SizeOf<T>();
-            return ret;
-        }
-
         internal void ReadArray<T>(ref T[] r, int offset = 0, int count = 0) where T : struct
         {
             count = count == 0 ? r.Length : count;
             _view.ReadArray(Position, r, offset, count);
             Position += Unsafe.SizeOf<T>() * count;
         }
-
-        internal void ReadArray<T>(long position, ref T[] r, int offset = 0, int count = 0) where T : struct
+        internal T[] ReadArray<T>(long position, int length) where T : struct
         {
-            count = count == 0 ? r.Length : count;
-            _view.ReadArray(position, r, offset, count);
-            Position = position + Unsafe.SizeOf<T>() * count;
+            var r = new T[length];
+            ReadArray(ref r);
+            return r;
         }
 
         internal void BlockCopy(long position, ref byte[] dest, int offset, int count)
@@ -119,14 +104,6 @@ namespace MdfTools.Utils
             {
                 Unsafe.CopyBlock(tgt + offset, _startOfFile + position, (uint) count);
             }
-        }
-
-        internal T[] ReadArray<T>(long position, int length) where T : struct
-        {
-            var r = new T[length];
-            _view.ReadArray(position, r, 0, length);
-            Position = position + Marshal.SizeOf<T>() * length;
-            return r;
         }
     }
 }
