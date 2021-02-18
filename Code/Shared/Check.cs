@@ -31,5 +31,12 @@ namespace MdfTools.Shared
             throw ex;
 #endif
         }
+
+        public static void PleaseSendMeYourFile()
+        {
+            throw new NotImplementedException(
+                "The author does not have access to a file using this feature. " +
+                "Please create an issue and attach a sample file.");
+        }
     }
 }

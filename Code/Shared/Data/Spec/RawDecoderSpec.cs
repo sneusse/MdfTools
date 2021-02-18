@@ -61,7 +61,7 @@ namespace MdfTools.Shared.Data.Spec
                     Mask = ulong.MaxValue;
             }
 
-            var samplesAreLittleEndian = ByteOrder == ByteOrder.Intel;
+            var samplesAreLittleEndian = ByteOrder == ByteOrder.LittleEndian;
             IsSameEndianess = BitConverter.IsLittleEndian == samplesAreLittleEndian;
 
             if (DataType == DataType.Float && (bitLength == 32 || bitLength == 64))

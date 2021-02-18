@@ -19,7 +19,7 @@ namespace MdfTools.Shared.Data.Base
         }
 
 
-        public static LodBuffer Create(NumericBufferBase original, int minSamples = 256)
+        public static LodBuffer Create(NumericBufferBaseNative original, int minSamples = 256)
         {
             var size = Unsafe.SizeOf<double>();
 

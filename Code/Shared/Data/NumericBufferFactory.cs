@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections;
-using System.Net.Http.Headers;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MdfTools.Shared.Data.Base;
@@ -25,27 +23,27 @@ namespace MdfTools.Shared.Data
             if (raw.IsSameEndianess &&
                 conv == ValueConversionType.Linear ||
                 conv == ValueConversionType.Identity)
-            {
                 ret = new LinearBuffer(channel, length);
-            }
 
             //TODO: add endianess swapped buffer when we have access to validation data.
 
             if (noConversion)
                 ret.DisableConversion();
 
-            if (ret == null)
-            {
-            }
+            if (ret == null) Check.PleaseSendMeYourFile();
 
             return ret;
         }
 
-        private class LinearBuffer : NumericBufferBase
+#if USE_NATIVE_ALLOCATIONS
+        private unsafe class LinearBuffer : NumericBufferBaseNative
+#else
+        private class LinearBuffer : NumericBufferBaseManaged
+#endif
         {
-            private ValueConversionSpec.Linear _conv;
             private readonly ulong _mask;
             private readonly int _shift;
+            private ValueConversionSpec.Linear _conv;
 
             public LinearBuffer(IDecodable decodable, long length) : base(decodable, length)
             {
@@ -59,12 +57,10 @@ namespace MdfTools.Shared.Data
                 _conv = ValueConversionSpec.LinearIdentity;
             }
 
-            public override unsafe void Update(Span<byte> raw, ulong offset, ulong sampleStart, uint sampleCount)
+            public override void Update(Span<byte> raw, ulong offset, ulong sampleStart, uint sampleCount)
             {
                 var str = (int) (offset + (ulong) Raw.TotalByteOffset);
-#if USE_NATIVE_ALLOCATIONS
-                double* Storage = (double*) HeapArray.ToPointer();
-#endif
+
                 unchecked
                 {
                     switch (Raw.NativeType)
@@ -76,7 +72,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((byte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (byte) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -85,7 +81,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((ushort) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (ushort) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -94,7 +90,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((uint) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (uint) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -103,7 +99,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((ulong) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -112,7 +108,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((sbyte) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (sbyte) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -121,7 +117,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((short) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (short) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -130,7 +126,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((int) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (int) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -139,7 +135,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((long) ((value >> _shift) & _mask)) * _conv.Scale + _conv.Offset;
+                            Storage[i] = (long) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
                             str += Stride;
                         }
 
@@ -162,55 +158,46 @@ namespace MdfTools.Shared.Data
                         }
 
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                     }
                 }
             }
+
         }
     }
 
-    public abstract class NumericBufferBase : SampleBuffer<double>, IDisposable
+    public abstract class NumericBufferBaseManaged : NumericBufferBase
     {
-#if USE_NATIVE_ALLOCATIONS
-        internal readonly IntPtr HeapArray;
-        protected readonly long Length;
-        public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
-        public override unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
-#else
-        internal readonly IntPtr HeapArray; //TODO: maybe have two buffer classes...
         protected readonly double[] Storage;
         public sealed override IList Data => Storage;
         public override Span<double> Span => Storage.AsSpan();
-#endif
 
-        protected readonly RawDecoderSpec Raw;
-        protected readonly ValueConversionSpec Val;
-
-        protected readonly int Stride;
-
-
-        protected NumericBufferBase(IDecodable decodable, long length) : base(decodable)
+        protected NumericBufferBaseManaged(IDecodable decodable, long length) : base(decodable)
         {
-#if USE_NATIVE_ALLOCATIONS
-            Length = length;
-            HeapArray = Marshal.AllocHGlobal((IntPtr) (length * 8));
-#else
-                Storage = new double[length];
-#endif
-            var decoder = decodable.DecoderSpec;
-            Raw = decoder.RawDecoderSpec;
-            Val = decoder.ValueConversionSpec;
-            Stride = (int) Raw.Stride;
+            Storage = new double[length];
         }
+    }
 
-        public virtual void DisableConversion()
+    public abstract unsafe class NumericBufferBaseNative : NumericBufferBase
+    {
+        internal readonly IntPtr HeapArray;
+        protected readonly long Length;
+
+        protected readonly double* Storage;
+        public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
+        public override Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
+
+        protected NumericBufferBaseNative(IDecodable decodable, long length) : base(decodable)
         {
+            Length = length;
+            HeapArray = Marshal.AllocHGlobal((IntPtr) (length * Unsafe.SizeOf<double>()));
+            Storage = (double*) HeapArray.ToPointer();
         }
 
         private void ReleaseUnmanagedResources()
         {
-#if USE_NATIVE_ALLOCATIONS
             Marshal.FreeHGlobal(HeapArray);
-#endif
         }
 
         protected virtual void Dispose(bool disposing)
@@ -227,9 +214,33 @@ namespace MdfTools.Shared.Data
             GC.SuppressFinalize(this);
         }
 
-        ~NumericBufferBase()
+        ~NumericBufferBaseNative()
         {
             Dispose(false);
+        }
+    }
+
+    public abstract class NumericBufferBase : SampleBuffer<double>
+    {
+        protected readonly RawDecoderSpec Raw;
+
+        protected readonly int Stride;
+        protected readonly ValueConversionSpec Val;
+
+        protected NumericBufferBase(IDecodable decodable) : base(decodable)
+        {
+            var decoder = decodable.DecoderSpec;
+            Raw = decoder.RawDecoderSpec;
+            Val = decoder.ValueConversionSpec;
+            Stride = (int) Raw.Stride;
+        }
+
+        public virtual void DisableConversion()
+        {
+        }
+
+        public override void Dispose()
+        {
         }
     }
 }
