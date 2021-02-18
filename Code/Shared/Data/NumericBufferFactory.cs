@@ -176,9 +176,10 @@ namespace MdfTools.Shared.Data
         public sealed override IList Data => null; //TODO: hmm... maybe change the interface?
         public override unsafe Span<double> Span => new Span<double>(HeapArray.ToPointer(), (int) Length);
 #else
-            protected readonly double[] Storage;
-            public sealed override IList Data => Storage;
-            public override Span<double> Span => Storage.AsSpan();
+        internal readonly IntPtr HeapArray; //TODO: maybe have two buffer classes...
+        protected readonly double[] Storage;
+        public sealed override IList Data => Storage;
+        public override Span<double> Span => Storage.AsSpan();
 #endif
 
         protected readonly RawDecoderSpec Raw;
