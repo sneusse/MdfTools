@@ -338,7 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/Scratch
 /MdfTools/Scratch.cs
 /Code/Scratch.cs
-/ScratchNet4
+/Scratch/**/*.cs
+/ScratchNet4/**/*.cs
