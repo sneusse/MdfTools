@@ -192,7 +192,7 @@ namespace MdfTools.V4
 #endif
         }
 
-        public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
+        public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
@@ -204,9 +204,7 @@ namespace MdfTools.V4
 #endif
                 {
                     var grp = grouping.Key;
-                    var grpSampleCount = sampleLimit == -1 ? (long) grp.SampleCount : sampleLimit;
-
-                    var smp = CreateForGroup(grouping, 0, (ulong)grpSampleCount);
+                    var smp = CreateForGroup(grouping, 0, (ulong)grp.SampleCount);
                     stuff.Add(smp);
                 }
 #if RELEASE
