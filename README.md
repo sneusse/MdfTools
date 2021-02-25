@@ -37,7 +37,7 @@ A MDF 4.x Reader (for now)
 * Reading the files I have access to works, others might not.
 * This is a very early stage, API and internals might change.
 * ~ Half of the blocks are not yet implemented<sup>1</sup> (properly)
-* Only linear conversion is implemented<sup>1</sup>
+* Only linear and rational conversions are implemented<sup>1</sup>
 * Only host-byte order is implemented<sup>1</sup>
 
 <sup>1</sup>: mostly because I don't have access to validation data/example files
