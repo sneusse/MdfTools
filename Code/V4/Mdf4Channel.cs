@@ -48,22 +48,10 @@ namespace MdfTools.V4
 
         private void CreateValueConversionSpec(Mdf4CCBlock c, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
         {
-            void MappingHelper(int numBlocks, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
-            {
-                // TODO: actually create the val -> text mapping stuff
-
-                var blks = Enumerable.Range(0, numBlocks).Select(k => c.Ref(k)).ToArray();
-                var singleConversion = blks.OfType<Mdf4CCBlock>().ToArray();
-
-                if (singleConversion.Length > 1)
-                    Check.NotImplemented();
-
-                else if (singleConversion.Length == 1)
-                    CreateValueConversionSpec(singleConversion[0], ref val, ref disp);
-            }
-
             if (c == null)
                 return;
+
+            var p = c.Params;
 
             if (ChannelGroup.File.ConversionCache.TryGetValue(c, out var specs))
             {
@@ -72,7 +60,29 @@ namespace MdfTools.V4
                 return;
             }
 
-            var p = c.Params;
+            void MappingHelper(int numBlocks, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
+            {
+                var blks = Enumerable.Range(0, numBlocks).Select(k => c.Ref(k)).ToArray();
+                var singleConversion = blks.OfType<Mdf4CCBlock>().ToArray();
+
+                if (singleConversion.Length > 1)
+                    Check.NotImplemented();
+
+                else if (singleConversion.Length == 1)
+                    CreateValueConversionSpec(singleConversion[0], ref val, ref disp);
+
+                var lookup = new DisplayConversionSpec.LookupTable();
+                for (int i = 0; i < blks.Length; i++)
+                {
+                    if (blks[i] is Mdf4TXBlock str)
+                    {
+                        lookup[p[i]] = str;
+                    }
+                }
+
+                disp = lookup;
+            }
+
             switch (c.Data.ConversionType)
             {
             case Mdf4CCBlock.ConversionType.Identity:
