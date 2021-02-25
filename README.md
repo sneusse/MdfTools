@@ -44,7 +44,7 @@ A MDF 4.x Reader (for now)
 
 ### Missing:
 
-* FH Block - File History Block
+* ~~FH Block - File History Block~~
 * SD Block - Signal Data Block
 * DV Block - Data Values Block
 * LD Block - List Data Block
