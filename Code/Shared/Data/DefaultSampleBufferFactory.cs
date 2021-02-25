@@ -19,8 +19,6 @@ namespace MdfTools.Shared.Data
 
         public override SampleBuffer Allocate(IDecodable channel, long length, bool noConversion)
         {
-            using var time = Mdf4File.Metrics.Allocations.Measure(length * 8);
-
             var spec = channel.DecoderSpec;
             if (spec.IsNumeric) return _numericBufferFactory.Allocate(channel, length, noConversion);
 

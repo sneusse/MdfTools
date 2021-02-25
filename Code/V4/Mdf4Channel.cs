@@ -36,13 +36,14 @@ namespace MdfTools.V4
                 channelGroup.MasterChannel = this;
 
             if (cnBlock.Data.ChannelType == Mdf4CNBlock.ChannelType.VariableLength)
-                Check.NotImplementedSuppressed();
+                Check.NotImplementedSuppressed(new NotImplementedException("VariableLength Channel"));
         }
 
         public ValueDecoderSpec DecoderSpec => _spec ??= CreateDataSpecLazy();
 
         public SampleBuffer CreateBuffer(long length, bool noConversion = false)
         {
+            using var time = Mdf4File.Metrics.Allocations.Measure(length * 8);
             return ChannelGroup.File.SampleBufferFactory.Allocate(this, length, noConversion);
         }
 

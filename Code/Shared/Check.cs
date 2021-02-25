@@ -17,7 +17,7 @@ namespace MdfTools.Shared
 
         public static void NotImplemented(Exception ex = null)
         {
-#if RELEASE
+#if RELEASE && !SUPPRESSED
 #else
             ex ??= new NotImplementedException();
             throw ex;
