@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MdfTools.Shared;
 using MdfTools.Shared.Data.Base;
 using MdfTools.Shared.Data.Spec;
@@ -45,33 +46,45 @@ namespace MdfTools.V4
             return ChannelGroup.File.SampleBufferFactory.Allocate(this, length, noConversion);
         }
 
-        private (ValueConversionSpec Val, DisplayConversionSpec Disp) CreateConverters()
+        private void CreateValueConversionSpec(Mdf4CCBlock c, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
         {
-            DisplayConversionSpec display = DisplayConversionSpec.Default;
-            ValueConversionSpec values = ValueConversionSpec.Default;
+            void MappingHelper(int numBlocks, ref ValueConversionSpec val, ref DisplayConversionSpec disp)
+            {
+                // TODO: actually create the val -> text mapping stuff
 
-            var c = _cnBlock.Conversion;
-            if (c == null) return (values, display);
+                var blks = Enumerable.Range(0, numBlocks).Select(k => c.Ref(k)).ToArray();
+                var singleConversion = blks.OfType<Mdf4CCBlock>().ToArray();
 
-            //TODO: add cache here?
+                if (singleConversion.Length > 1)
+                    Check.NotImplemented();
+
+                else if (singleConversion.Length == 1)
+                    CreateValueConversionSpec(singleConversion[0], ref val, ref disp);
+            }
+
+            if (c == null)
+                return;
 
             var p = c.Params;
-
             switch (c.Data.ConversionType)
             {
             case Mdf4CCBlock.ConversionType.Identity:
-                values = ValueConversionSpec.Default;
+                val = ValueConversionSpec.Default;
                 break;
             case Mdf4CCBlock.ConversionType.Linear:
                 if (c.Params[0] == 0 && c.Params[1] == 1)
-                    values = ValueConversionSpec.Default;
+                    val = ValueConversionSpec.Default;
                 else
-                    values = new ValueConversionSpec.Linear(p[0], p[1]);
-
+                    val = new ValueConversionSpec.Linear(p[0], p[1]);
                 break;
             case Mdf4CCBlock.ConversionType.Rational:
                 if (p[0] == 0 && p[3] == 0 && p[4] == 0 && p[5] == 1)
-                    values = new ValueConversionSpec.Linear(p[2], p[1]);
+                {
+                    if (p[2] == 0 && p[1] == 1)
+                        val = ValueConversionSpec.Default;
+                    else
+                        val = new ValueConversionSpec.Linear(p[2], p[1]);
+                }
                 else
                     Check.NotImplemented(new NotImplementedException());
 
@@ -81,10 +94,9 @@ namespace MdfTools.V4
                 break;
             case Mdf4CCBlock.ConversionType.ValToValInterp:
                 if (p.Length == 4 && p[0] == p[1] && p[2] == p[3])
-                    values = ValueConversionSpec.Default;
+                    val = ValueConversionSpec.Default;
                 else
                     Check.NotImplemented(new NotImplementedException());
-
                 break;
             case Mdf4CCBlock.ConversionType.ValToValNoInterp:
                 Check.NotImplemented(new NotImplementedException());
@@ -94,66 +106,21 @@ namespace MdfTools.V4
                 break;
             case Mdf4CCBlock.ConversionType.ValToTextScaleTab:
             {
-                //TODO: add the text stuff again (and clean it up.)
-                var len = p.Length;
-                var allAreText = true;
-                var items = new Mdf4Block[len];
-                for (var i = 0; i < len; i++)
-                {
-                    var blk = c.Ref(i);
-                    allAreText &= blk is Mdf4TXBlock;
-                    items[i] = blk;
-                }
-
-                if (allAreText)
-                {
-                    var lookup = new Dictionary<double, string>();
-                    for (var i = 0; i < items.Length; i++) lookup[i] = items[i].ToString();
-
-                    // text = new TextConverter.LookupConverter(lookup);
-                }
-                else
-                {
-                    Check.NotImplemented(new NotImplementedException());
-                }
-
+                MappingHelper(p.Length, ref val, ref disp);
                 break;
             }
             case Mdf4CCBlock.ConversionType.ValRangeToTextScaleTab:
             {
-                //TODO: add the text stuff again (and clean it up.)
-                var allAreText = true;
-                var items = new Mdf4Block[c.Data.RefCount];
-                for (var i = 0; i < items.Length; i++)
-                {
-                    var blk = c.Ref(i);
-                    var okIsh = blk is Mdf4TXBlock;
-                    if (!okIsh && blk is Mdf4CCBlock c2 &&
-                        c2.Data.ConversionType == Mdf4CCBlock.ConversionType.Identity)
-                        okIsh = true;
+                var noRange = true;
+                for (var i = 0; i < p.Length; i += 2)
+                    noRange &= p[i] == p[i + 1];
 
-                    allAreText &= okIsh;
-                    items[i] = blk;
+                if (!noRange)
+                {
+                    Check.NotImplemented();
                 }
 
-                if (!allAreText) Check.NotImplemented(new NotImplementedException());
-
-                var thereIsNoRange = true;
-                for (var i = 0; i < p.Length; i += 2) thereIsNoRange &= p[i] == p[i + 1];
-
-                if (thereIsNoRange)
-                {
-                    var lookup = new Dictionary<double, string>();
-                    for (var i = 0; i < items.Length; i++) lookup[i] = items[i].ToString();
-
-                    // text = new TextConverter.LookupConverter(lookup);
-                }
-                else
-                {
-                    Check.NotImplemented(new NotImplementedException());
-                }
-
-
+                MappingHelper(p.Length / 2 + 1, ref val, ref disp);
                 break;
             }
             case Mdf4CCBlock.ConversionType.TextToVal:
@@ -165,9 +132,9 @@ namespace MdfTools.V4
             case Mdf4CCBlock.ConversionType.BitfieldText:
                 Check.NotImplemented(new NotImplementedException());
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
-
-            return (values, display);
         }
 
         private ValueDecoderSpec CreateDataSpecLazy()
@@ -245,8 +212,12 @@ namespace MdfTools.V4
             }
 
             var packSpec = new RawDecoderSpec(stride, byteOffset, bitOffset, bitLength, byteOrder, dataType);
-            var converters = CreateConverters();
-            return new ValueDecoderSpec(packSpec, converters.Val, converters.Disp);
+
+            ValueConversionSpec valConv = ValueConversionSpec.Default;
+            DisplayConversionSpec dispConv = DisplayConversionSpec.Default;
+            CreateValueConversionSpec(_cnBlock.Conversion, ref valConv, ref dispConv);
+
+            return new ValueDecoderSpec(packSpec, valConv, dispConv);
         }
 
         public override string ToString()
