@@ -170,6 +170,28 @@ namespace MdfTools.V4
         public static BufferView<Mdf4Channel>[] LoadFull(params Mdf4Channel[] channels)
             => LoadFull((IEnumerable<Mdf4Channel>) channels);
 
+
+        public static void LoadAndThrow(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
+        {
+            var byGroup = channels.GroupBy(k => k.ChannelGroup);
+
+#if RELEASE
+            Parallel.ForEach(byGroup, grouping =>
+#else
+            foreach (var grouping in byGroup)
+#endif
+                {
+                    var grp = grouping.Key;
+                    var grpSampleCount = sampleLimit == -1 ? (long)grp.SampleCount : sampleLimit;
+
+                    var smp = CreateForGroup(grouping, 0, (ulong)grpSampleCount);
+                    smp.Dispose();
+                }
+#if RELEASE
+            );
+#endif
+        }
+
         public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);

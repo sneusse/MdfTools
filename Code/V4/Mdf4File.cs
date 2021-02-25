@@ -81,8 +81,8 @@ namespace MdfTools.V4
             Metrics = new PerfMetrics();
             var parser = new Mdf4Parser(filename);
             var mf4 = parser.Open().PrepareForMultiThreading();
-            var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
-
+            // var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
+            Mdf4Sampler.LoadAndThrow(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
             var elapsed = sw.Elapsed.TotalSeconds;
 
 
@@ -98,9 +98,9 @@ namespace MdfTools.V4
             {
                 Console.WriteLine("-- File Info........");
                 Console.WriteLine($"# Groups in file   : {mf4.ChannelGroups.Count}");
-                Console.WriteLine($"# Groups loaded    : {buffers.Select(k => k.Channel.ChannelGroup).Distinct().Count()}");
+                // Console.WriteLine($"# Groups loaded    : {buffers.Select(k => k.Channel.ChannelGroup).Distinct().Count()}");
                 Console.WriteLine($"# Channels in file : {mf4.ChannelGroups.SelectMany(k => k.Channels).Count()}");
-                Console.WriteLine($"# Channels loaded  : {buffers.Select(k => k.Channel).Distinct().Count()}");
+                // Console.WriteLine($"# Channels loaded  : {buffers.Select(k => k.Channel).Distinct().Count()}");
                 Console.WriteLine("-- Data.............");
                 Console.WriteLine($"Raw-bytes loaded   : {FormatUtils.GetBytesReadable(metrics.CopyRawData.Value0)}");
                 Console.WriteLine($"Zip-bytes loaded   : {FormatUtils.GetBytesReadable(metrics.ExtractAndTranspose.Value0)}");
@@ -122,10 +122,10 @@ namespace MdfTools.V4
 
             mf4.Dispose();
 
-            for (int i = 0; i < buffers.Length; i++)
-            {
-                buffers[i].Dispose();
-            }
+            // for (int i = 0; i < buffers.Length; i++)
+            // {
+            //     buffers[i].Dispose();
+            // }
         }
 
         internal class PerfMetrics
