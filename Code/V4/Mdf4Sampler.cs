@@ -182,9 +182,9 @@ namespace MdfTools.V4
 #endif
                 {
                     var grp = grouping.Key;
-                    sampleLimit = sampleLimit == -1 ? (long) grp.SampleCount : sampleLimit;
+                    var grpSampleCount = sampleLimit == -1 ? (long) grp.SampleCount : sampleLimit;
 
-                    var smp = CreateForGroup(grouping, 0, (ulong) sampleLimit);
+                    var smp = CreateForGroup(grouping, 0, (ulong)grpSampleCount);
                     stuff.Add(smp);
                 }
 #if RELEASE
