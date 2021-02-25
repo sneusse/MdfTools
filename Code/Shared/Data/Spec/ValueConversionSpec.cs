@@ -4,6 +4,7 @@
     {
         public static readonly Identity Default = new Identity();
         public static readonly Linear LinearIdentity = new Linear(0, 1);
+        public static readonly Rational3 Rat3Identity = new Rational3(0, 1, 0, 1, 0, 0);
 
         public abstract ValueConversionType ConversionType { get; }
 

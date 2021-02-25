@@ -25,6 +25,9 @@ namespace MdfTools.Shared.Data
                 conv == ValueConversionType.Identity)
                 ret = new LinearBuffer(channel, length);
 
+            else if (raw.IsSameEndianess && conv == ValueConversionType.Rational3)
+                ret = new Rat3Buffer(channel, length);
+
             //TODO: add endianess swapped buffer when we have access to validation data.
 
             if (noConversion)
@@ -34,6 +37,158 @@ namespace MdfTools.Shared.Data
 
             return ret;
         }
+
+
+#if USE_NATIVE_ALLOCATIONS
+        private unsafe class Rat3Buffer : NumericBufferBaseNative
+#else
+        private class LinearBuffer : NumericBufferBaseManaged
+#endif
+        {
+            private readonly ulong _mask;
+            private readonly int _shift;
+            private ValueConversionSpec.Rational3 _conv;
+
+            public Rat3Buffer(IDecodable decodable, long length) : base(decodable, length)
+            {
+                _conv = (ValueConversionSpec.Rational3) Val;
+                _mask = Raw.Mask;
+                _shift = Raw.Shift;
+            }
+
+            public override void DisableConversion()
+            {
+                _conv = ValueConversionSpec.Rat3Identity;
+            }
+
+            public override void Update(Span<byte> raw, ulong offset, ulong sampleStart, uint sampleCount)
+            {
+                var str = (int) (offset + (ulong) Raw.TotalByteOffset);
+
+                unchecked
+                {
+                    switch (Raw.NativeType)
+                    {
+                    case NativeType.NotNative:
+                        Check.ThrowUnexpectedExecutionPath();
+                        break;
+                    case NativeType.UInt8:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (byte) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.UInt16:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (ushort) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.UInt32:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (uint) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.UInt64:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (ulong) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Int8:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (sbyte) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Int16:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (short) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Int32:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (int) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Int64:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
+                            double t = (long) ((value >> _shift) & _mask);
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Float:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<float>(ref raw[str]);
+                            double t = value;
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    case NativeType.Double:
+                        for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
+                        {
+                            var value = Unsafe.ReadUnaligned<double>(ref raw[str]);
+                            double t = value;
+                            double t2 = t * t;
+                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            str += Stride;
+                        }
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+        }
+
 
 #if USE_NATIVE_ALLOCATIONS
         private unsafe class LinearBuffer : NumericBufferBaseNative
@@ -163,7 +318,6 @@ namespace MdfTools.Shared.Data
                     }
                 }
             }
-
         }
     }
 

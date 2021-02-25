@@ -104,7 +104,7 @@ namespace MdfTools.V4
                         val = new ValueConversionSpec.Linear(p[2], p[1]);
                 }
                 else
-                    Check.NotImplemented(new NotImplementedException());
+                    val = new ValueConversionSpec.Rational3(p[2], p[1], p[0], p[5], p[4], p[3]);
 
                 break;
             case Mdf4CCBlock.ConversionType.AlgebraicText:
@@ -159,13 +159,13 @@ namespace MdfTools.V4
 
         private ValueDecoderSpec CreateDataSpecLazy()
         {
-            int extraOffsetFromMdfTrashSpec = ChannelGroup.RecordIdSize;
+            int recordIdOffset = ChannelGroup.RecordIdSize;
 
             // var spec = new RawDecoderSpec();
             ref var data = ref _cnBlock.Data;
             var stride = ChannelGroup.RecordLength;
             var bitOffset = data.BitOffset;
-            var byteOffset = (int) data.ByteOffset + extraOffsetFromMdfTrashSpec;
+            var byteOffset = (int) data.ByteOffset + recordIdOffset;
             var bitLength = (int) data.BitLength;
             var byteOrder = ByteOrder.Undefined;
             var dataType = DataType.Unknown;
