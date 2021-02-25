@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using MdfTools.Shared.Data;
 using MdfTools.Shared.Data.Base;
+using MdfTools.Shared.Data.Spec;
 using MdfTools.Utils;
 
 namespace MdfTools.V4
@@ -33,6 +34,9 @@ namespace MdfTools.V4
         public bool IsWritable { get; }
 
         public bool IsReadable { get; }
+
+        internal readonly Dictionary<Mdf4CCBlock, (ValueConversionSpec, DisplayConversionSpec)> ConversionCache =
+            new Dictionary<Mdf4CCBlock, (ValueConversionSpec, DisplayConversionSpec)>();
 
         internal Mdf4File(Mdf4Parser mdf4Parser, string filename)
         {
@@ -82,7 +86,7 @@ namespace MdfTools.V4
             {
                 Console.WriteLine($"{FormatUtils.GetBytesReadable(Metrics.SampleReading.Value0, "samples")}" +
                                   $" - {FormatUtils.GetBytesReadable(Metrics.SampleReading.Value1, "B")}" +
-                                  $" - {FormatUtils.GetBytesReadable((long)(Metrics.SampleReading.Value1 / elapsed))}ps" +
+                                  $" - {FormatUtils.GetBytesReadable((long) (Metrics.SampleReading.Value1 / elapsed))}ps" +
                                   $" - {elapsed:n2}s");
             }
             else

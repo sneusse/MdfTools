@@ -65,6 +65,13 @@ namespace MdfTools.V4
             if (c == null)
                 return;
 
+            if (ChannelGroup.File.ConversionCache.TryGetValue(c, out var specs))
+            {
+                val = specs.Item1;
+                disp = specs.Item2;
+                return;
+            }
+
             var p = c.Params;
             switch (c.Data.ConversionType)
             {
@@ -135,6 +142,8 @@ namespace MdfTools.V4
             default:
                 throw new ArgumentOutOfRangeException();
             }
+
+            ChannelGroup.File.ConversionCache[c] = (val, disp);
         }
 
         private ValueDecoderSpec CreateDataSpecLazy()
