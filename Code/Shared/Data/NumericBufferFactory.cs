@@ -42,7 +42,7 @@ namespace MdfTools.Shared.Data
 #if USE_NATIVE_ALLOCATIONS
         private unsafe class Rat3Buffer : NumericBufferBaseNative
 #else
-        private class LinearBuffer : NumericBufferBaseManaged
+        private class Rat3Buffer : NumericBufferBaseManaged
 #endif
         {
             private readonly ulong _mask;
@@ -65,6 +65,8 @@ namespace MdfTools.Shared.Data
             {
                 var str = (int) (offset + (ulong) Raw.TotalByteOffset);
 
+                var storage = Storage;
+
                 unchecked
                 {
                     switch (Raw.NativeType)
@@ -78,7 +80,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (byte) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -89,7 +91,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (ushort) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -100,7 +102,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (uint) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -111,7 +113,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (ulong) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -122,7 +124,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (sbyte) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -133,7 +135,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (short) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -144,7 +146,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (int) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -155,7 +157,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
                             double t = (long) ((value >> _shift) & _mask);
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -166,7 +168,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<float>(ref raw[str]);
                             double t = value;
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -177,7 +179,7 @@ namespace MdfTools.Shared.Data
                             var value = Unsafe.ReadUnaligned<double>(ref raw[str]);
                             double t = value;
                             double t2 = t * t;
-                            Storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
+                            storage[i] = (_conv.N0 + _conv.N1 * t + _conv.N2 * t2) / (_conv.D0 + _conv.D1 * t + _conv.D2 * t2);
                             str += Stride;
                         }
 
@@ -196,15 +198,11 @@ namespace MdfTools.Shared.Data
         private class LinearBuffer : NumericBufferBaseManaged
 #endif
         {
-            private readonly ulong _mask;
-            private readonly int _shift;
             private ValueConversionSpec.Linear _conv;
 
             public LinearBuffer(IDecodable decodable, long length) : base(decodable, length)
             {
                 _conv = Val as ValueConversionSpec.Linear ?? ValueConversionSpec.LinearIdentity;
-                _mask = Raw.Mask;
-                _shift = Raw.Shift;
             }
 
             public override void DisableConversion()
@@ -215,6 +213,13 @@ namespace MdfTools.Shared.Data
             public override void Update(Span<byte> raw, ulong offset, ulong sampleStart, uint sampleCount)
             {
                 var str = (int) (offset + (ulong) Raw.TotalByteOffset);
+
+                var storage = Storage;
+
+                var scale = _conv.Scale;
+                var ofs = _conv.Offset;
+                var mask = Raw.Mask;
+                var shift = Raw.Shift;
 
                 unchecked
                 {
@@ -227,7 +232,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (byte) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (byte) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -236,7 +241,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (ushort) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (ushort) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -245,7 +250,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (uint) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (uint) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -254,7 +259,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -263,7 +268,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (sbyte) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (sbyte) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -272,7 +277,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (short) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (short) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -281,7 +286,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (int) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (int) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -290,7 +295,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<ulong>(ref raw[str]);
-                            Storage[i] = (long) ((value >> _shift) & _mask) * _conv.Scale + _conv.Offset;
+                            storage[i] = (long) ((value >> shift) & mask) * scale + ofs;
                             str += Stride;
                         }
 
@@ -299,7 +304,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<float>(ref raw[str]);
-                            Storage[i] = value * _conv.Scale + _conv.Offset;
+                            storage[i] = value * scale + ofs;
                             str += Stride;
                         }
 
@@ -308,7 +313,7 @@ namespace MdfTools.Shared.Data
                         for (var i = sampleStart; i < sampleStart + sampleCount; ++i)
                         {
                             var value = Unsafe.ReadUnaligned<double>(ref raw[str]);
-                            Storage[i] = value * _conv.Scale + _conv.Offset;
+                            storage[i] = value * scale + ofs;
                             str += Stride;
                         }
 
