@@ -81,8 +81,8 @@ namespace MdfTools.V4
             Metrics = new PerfMetrics();
             var parser = new Mdf4Parser(filename);
             var mf4 = parser.Open().PrepareForMultiThreading();
-            // var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
-            Mdf4Sampler.LoadAndThrow(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
+            var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels));
+            // Mdf4Sampler.LoadAndThrow(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
             var elapsed = sw.Elapsed.TotalSeconds;
 
 
@@ -122,10 +122,10 @@ namespace MdfTools.V4
 
             mf4.Dispose();
 
-            // for (int i = 0; i < buffers.Length; i++)
-            // {
-            //     buffers[i].Dispose();
-            // }
+            for (int i = 0; i < buffers.Length; i++)
+            {
+                buffers[i].Dispose();
+            }
         }
 
         internal class PerfMetrics
