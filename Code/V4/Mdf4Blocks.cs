@@ -25,6 +25,17 @@ namespace MdfTools.V4
         public ushort IdVer;
         public fixed byte IdReserved2[4];
         public ushort IdUnfinFlags;
+        
+        public string IdFileStr
+        {
+            get
+            {
+                fixed (byte* p = IdFile)
+                {
+                    return new string((sbyte*)p,0,8);
+                }
+            }
+        }
     }
 
 
@@ -135,7 +146,7 @@ namespace MdfTools.V4
         }
     }
 
-    internal class Mdf4DZBlock : Mdf4DataBlock
+    internal class Mdf4DZBlock : Mdf4DataBlock, IMdf4DataRoot
     {
         public enum ZLibCompressionInfo : byte
         {
@@ -276,6 +287,19 @@ namespace MdfTools.V4
             public byte ZLibHeader;
             public ZLibCompressionInfo CompressionInfo;
         }
+
+        public Mdf4DataBlock this[int index] => this;
+
+        public uint BlockCount => 1;
+        public IEnumerable<Mdf4DataBlock> GetAllDataBlocks()
+        {
+            yield return this;
+        }
+
+        public IEnumerable<DataBlockMap> GetBlockMap() => new DataBlockMap[1]
+        {
+            new DataBlockMap(Offset, 0, Parser)
+        };
     }
 
     internal class Mdf4DLBlock : Mdf4Block, IMdf4DataRoot
