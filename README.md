@@ -10,7 +10,7 @@ A MDF 4.x Reader (for now)
 ## Goals
 
 * Reading MDF 4.x
-* Reading MDF 4.x fast
+* Reading MDF 4.x fast (> 500Mb/s)
 * Reading partial sets (e.g. sample 0 - 100 or 1e15 - 1e16) without loading everything into memory
 * The ability to fully load `your common measurements`™ into memory (some 1-digit GB-sized files should just work™)
 * Minimal dependencies
