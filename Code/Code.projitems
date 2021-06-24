@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Native\LibDeflate.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Scratch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Check.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\BufferView.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\Data\Base\IDecodable.cs" />

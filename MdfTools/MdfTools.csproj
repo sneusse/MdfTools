@@ -6,6 +6,7 @@
     <Platforms>x64</Platforms>
     <Configurations>Debug;Release</Configurations>
     <OutputPath>../_bin/$(Configuration)</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
