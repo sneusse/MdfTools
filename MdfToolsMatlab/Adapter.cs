@@ -129,6 +129,9 @@ namespace MdfToolsMatlab
 
         public string GetDisplayValueOfSample(long index) =>
             Channel.Org.GetDisplayValue(Data[index]);
+        
+        public string GetDisplayValueForDouble(double value) =>
+            Channel.Org.GetDisplayValue(value);
 
         public MdfBufferAdapter(MdfChannelAdapter masterChannel,
             MdfChannelAdapter channel,
