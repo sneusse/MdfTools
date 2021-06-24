@@ -33,6 +33,8 @@ namespace MdfToolsMatlab
         public string Name { get; }
         public string Comment { get; }
         public MdfChannelGroupAdapter Group { get; }
+        
+        public bool IsMaster => Org.Master == Org;
 
         public MdfChannelAdapter(MdfChannelGroupAdapter groupAdapter, Mdf4Channel org)
         {
@@ -51,7 +53,6 @@ namespace MdfToolsMatlab
     public class MdfChannelGroupAdapter
     {
         public readonly Mdf4ChannelGroup Org;
-
         public MdfChannelAdapter[] Channels { get; }
         public string Name { get; }
         public string Source { get; }
@@ -78,13 +79,14 @@ namespace MdfToolsMatlab
 
         public MdfChannelGroupAdapter[] Groups { get; }
         public MdfChannelAdapter[] Channels { get; }
-
+        public MdfChannelAdapter[] DataChannel { get; }
 
         public MdfFileAdapter(Mdf4File file)
         {
             _file = file;
             Groups = _file.ChannelGroups.Select(k => new MdfChannelGroupAdapter(k)).ToArray();
             Channels = Groups.SelectMany(k => k.Channels).ToArray();
+            DataChannel = Channels.Where(k => !k.IsMaster).ToArray();
 
             foreach (var mdfChannelAdapter in Channels)
             {
@@ -155,7 +157,6 @@ namespace MdfToolsMatlab
         private readonly MdfFileAdapter _file;
         private MdfBufferAdapter[] _adapters = null;
 
-
         internal ChannelList(MdfFileAdapter file)
         {
             _file = file;
@@ -204,6 +205,21 @@ namespace MdfToolsMatlab
             var chan = _file.Channels.Where(k => k.Name.ToLower().Contains(name.ToLower())).ToArray();
             return AddHelper(chan);
         }
+
+        public int AddByDataChannelIndex(int index)
+        {
+            var chan = _file.DataChannel[index];
+            Channels.Add(chan);
+            return 1;
+        }
+
+        public MdfBufferAdapter GetByDataChannelIndex(int index)
+        {
+            var toFind = _file.DataChannel[index];
+            var adapter = _adapters.FirstOrDefault(k => k.Channel == toFind);
+            return adapter;
+        }
+        
 
         public MdfBufferAdapter[] Load()
         {
