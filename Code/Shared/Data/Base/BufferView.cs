@@ -9,6 +9,8 @@ namespace MdfTools.Shared.Data.Base
 
         public TDecodable Channel => (TDecodable) Original.Decodable;
 
+        public long Length => Original.Data?.Count ?? GetSpan<double>().Length;
+
         public BufferView(SampleBuffer original)
         {
             Original = original;
