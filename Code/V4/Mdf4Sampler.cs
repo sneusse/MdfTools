@@ -1,5 +1,5 @@
 ﻿
-//#define PARALLEL
+#define PARALLEL
 #define PARALLEL_GROUPS
 #define PARALLEL_GAPS
 
@@ -85,65 +85,93 @@ namespace MdfTools.V4
             // on the 'gaps' as the last step. ( | = parallel, -> sequential)
             // : AAABBB | DDD | FFFGGGHHH | KKKLLLMMM / sync / CCC -> EEE -> JJJ
 
+            // ~50 ?
+            int blocksPerThread = (int)((8.0 * blis[firstMapIndex].ByteLength / (channels.Length / 100.0)) / 50000);
+
+            if (blocksPerThread > 100)
+                blocksPerThread = 100;
+            if (blocksPerThread < 1)
+                blocksPerThread = 1;
+
+            var indices = new List<int>();
+            int next = firstMapIndex;
+            while (next <= lastMapIndex)
+            {
+                indices.Add(next);
+                next += blocksPerThread;
+            }
+
+
 #if PARALLEL
-            Parallel.For(firstMapIndex, lastMapIndex + 1, i =>
+            Parallel.ForEach(indices, ploop =>
+                {
+                    for (int i = ploop; i < (ploop + blocksPerThread); ++i)
+                    {
+                        if (i > lastMapIndex)
+                            return;
+
 #else
             for (var i = firstMapIndex; i <= lastMapIndex; ++i)
-#endif
                 {
-                    var bli = blis[i];
-                    var blk = bli.Block;
-
-                    // allocate 'a little bit more' as we always read 8 bytes
-                    var recordBuffer = MdfBufferPool.Rent(blk.ByteLength + 8);
-                    blk.CopyTo(recordBuffer, 0);
-                    bli.CopyGaps(recordBuffer, src.GapBuffer);
-
-                    //TODO: find better metric -.-
-                    var threadMetric = bli.SampleCount * channels.Length;
-                    var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
-
-#if PARALLEL
-                    //NORMAL VERSION
-                    if (threadCount <= 1)
-                    {
 #endif
-                        var byteOffset = (ulong) bli.Alignment.LeftByteOffset;
-                        var sampleStart = (ulong) bli.SampleIndex - realOffset;
-                        var sampleCount = (uint) bli.SampleCount;
 
-                        for (var cIndex = 0; cIndex < channels.Length; cIndex++)
-                        {
-                            var buffer = buffers[cIndex];
-                            buffer.Update(recordBuffer, byteOffset, sampleStart, sampleCount);
-                        }
+
+
+                        var bli = blis[i];
+                        var blk = bli.Block;
+
+                        // allocate 'a little bit more' as we always read 8 bytes
+                        var recordBuffer = MdfBufferPool.Rent(blk.ByteLength + 8);
+                        blk.CopyTo(recordBuffer, 0);
+                        bli.CopyGaps(recordBuffer, src.GapBuffer);
+
+                        //TODO: find better metric -.-
+                        var threadMetric = bli.SampleCount * channels.Length;
+                        var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
+
+
 #if PARALLEL
-                    }
-
-                    // THREADED VERSION
-                    else
-                    {
-                        var numThreads = threadCount;
-                        var split = bli.SampleCount / numThreads;
-                        var rest = bli.SampleCount % numThreads;
-
-                        var byteOffset = bli.Alignment.LeftByteOffset;
-                        Parallel.For(0, numThreads, i =>
+                        //NORMAL VERSION
+                        if (threadCount <= 1)
                         {
-                            var sampleStart = (ulong) (bli.SampleIndex + i * split) - realOffset;
-                            var sampleCount = (uint) (split + rest);
+#endif
+                            var byteOffset = (ulong) bli.Alignment.LeftByteOffset;
+                            var sampleStart = (ulong) bli.SampleIndex - realOffset;
+                            var sampleCount = (uint) bli.SampleCount;
 
                             for (var cIndex = 0; cIndex < channels.Length; cIndex++)
                             {
                                 var buffer = buffers[cIndex];
-                                buffer.Update(recordBuffer, (ulong) byteOffset, sampleStart, sampleCount);
+                                buffer.Update(recordBuffer, byteOffset, sampleStart, sampleCount);
                             }
-                        });
-                    }
-#endif
-                    MdfBufferPool.Return(recordBuffer);
-                }
 #if PARALLEL
+                        }
+
+                        // THREADED VERSION
+                        else
+                        {
+                            var numThreads = threadCount;
+                            var split = bli.SampleCount / numThreads;
+                            var rest = bli.SampleCount % numThreads;
+
+                            var byteOffset = bli.Alignment.LeftByteOffset;
+                            Parallel.For(0, numThreads, i =>
+                            {
+                                var sampleStart = (ulong) (bli.SampleIndex + i * split) - realOffset;
+                                var sampleCount = (uint) (split + rest);
+
+                                for (var cIndex = 0; cIndex < channels.Length; cIndex++)
+                                {
+                                    var buffer = buffers[cIndex];
+                                    buffer.Update(recordBuffer, (ulong) byteOffset, sampleStart, sampleCount);
+                                }
+                            });
+                        }
+#endif
+                        MdfBufferPool.Return(recordBuffer);
+                    }
+#if PARALLEL
+                }
             );
 #endif
             if (src.GapBuffer != null && src.GapBuffer.Length > 0)
