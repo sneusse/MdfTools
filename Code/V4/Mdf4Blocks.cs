@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using MdfTools.Native;
 using MdfTools.Shared;
@@ -194,28 +195,48 @@ namespace MdfTools.V4
 
                 // overhead for basically everything I have right now is bigger than the speedup.
                 // maybe if we have some files with 2/4/8MB blocks? Test when we have such a file.
-                //     Parallel.For(0, rows, r =>
-                //     {
-                //         for (int c = 0; c < columns; c++)
-                //         {
-                //             var transposedIndex = (int) rows * c + r;
-                //             fullBuffer[offset + transposedIndex] = transposedData[c];
-                //         }
-                //     });
 
-                unsafe
+                if (fullBuffer.Length > 2 * 1024 * 1024)
                 {
-                    fixed (byte* bufferStart = fullBuffer)
+                    Parallel.For(0, rows, r =>
                     {
-                        var b = bufferStart + offset;
-                        for (var c = 0; c < columns; c++)
-                        for (var r = 0; r < rows; r++)
+                        // for (int c = 0; c < columns; c++)
+                        // {
+                        //     var transposedIndex = (int) rows * c + r;
+                        //     fullBuffer[offset + transposedIndex] = transposedData[c];
+                        // }
+                        unsafe
                         {
-                            var transposedIndex = columns * r + c;
-                            *b++ = transposedData[transposedIndex];
+                            fixed (byte* bufferStart = fullBuffer)
+                            {
+                                var b = bufferStart + offset + columns * r;
+                                for (var c = 0; c < columns; c++)
+                                {
+                                    var transposedIndex = columns * r + c;
+                                    *b++ = transposedData[transposedIndex];
+                                }
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    unsafe
+                    {
+                        fixed (byte* bufferStart = fullBuffer)
+                        {
+                            var b = bufferStart + offset;
+                            for (var r = 0; r < rows; r++)
+                            for (var c = 0; c < columns; c++)
+                            {
+                                var transposedIndex = columns * r + c;
+                                *b++ = transposedData[transposedIndex];
+                            }
                         }
                     }
                 }
+
+              
 
 
                 // remaining untransposed stuff:
