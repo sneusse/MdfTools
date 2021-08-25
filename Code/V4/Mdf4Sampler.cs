@@ -1,5 +1,5 @@
 ﻿
-#define PARALLEL
+//#define PARALLEL
 #define PARALLEL_GROUPS
 #define PARALLEL_GAPS
 
@@ -175,7 +175,7 @@ namespace MdfTools.V4
                         byteOffset += (int) src.RecordLength;
                     }
                 }
-#if PARALLEL_GROUPS && PARALLEL_GAPS
+#if PARALLEL && PARALLEL_GAPS
                 );
 #endif
             }
