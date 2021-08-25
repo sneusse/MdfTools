@@ -65,6 +65,8 @@ namespace MdfTools.V4
             var seen = new HashSet<long>();
             var blockStack = new Stack<long>();
             var lateList = new List<Mdf4Block>();
+            ulong rawData = 0;
+            ulong zipData = 0;
 
             foreach (BlockId blockId in Enum.GetValues(typeof(BlockId)))
             {
@@ -91,6 +93,9 @@ namespace MdfTools.V4
 
                 if (rawHeader.Id == BlockId.MdfBlockDZ)
                 {
+                    var dz = Mdf4Block.Create(this, pos, _blockCache) as Mdf4DZBlock;
+                    zipData += dz.Data.CompressedDataLength;
+                    rawData += dz.Data.UncompressedDataLength;
                     var zid = Reader.GetRaw<BlockId>(block.BlockDataOffset);
                     zstats[zid]++;
                 }
@@ -105,6 +110,9 @@ namespace MdfTools.V4
 
             foreach (BlockId blockId in Enum.GetValues(typeof(BlockId)))
                 Console.WriteLine($"Block {blockId}: {stats[blockId]} (zipped: {zstats[blockId]})");
+
+            Console.WriteLine($"Raw data: ${FormatUtils.GetBytesReadable((long)rawData)}");
+            Console.WriteLine($"Zip data: ${FormatUtils.GetBytesReadable((long)zipData)}");
         }
 
 

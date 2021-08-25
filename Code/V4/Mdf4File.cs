@@ -72,6 +72,8 @@ namespace MdfTools.V4
         {
             Console.WriteLine($"Groups   : {ChannelGroups.Count}");
             Console.WriteLine($"Channels : {ChannelGroups.SelectMany(k => k.Channels).Count()}");
+
+            Mdf4Parser.DumpInfo();
         }
 
         public static void Bench(string filename, bool @short = false, long sampleLimit = -1)

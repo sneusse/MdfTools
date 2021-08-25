@@ -32,16 +32,23 @@ namespace MdfTools.V4
 
             var src = channels.First().ChannelGroup;
             var recLen = src.RecordLength;
-            var sampleToRecordFirst = sampleOffset * recLen;
-            var sampleToRecordLast = (sampleOffset + sampleCnt) * recLen;
-
             var blis = src.BlockLoadingInfos;
 
+
+
             //TODO: Auf binarysearch umstellen....
-            var firstMapIndex = Array.FindIndex(blis, 0, map => map.BytePosition <= (long) sampleToRecordFirst);
+            // var sampleToRecordFirst = sampleOffset * recLen;
+            // var sampleToRecordLast = (sampleOffset + sampleCnt) * recLen;
+            // var firstMapIndex = Array.FindIndex(blis, 0, map => map.BytePosition >= (long) sampleToRecordFirst);
+            // firstMapIndex = firstMapIndex == -1 ? 0 : firstMapIndex;
+            // var lastMapIndex =
+            //     Array.FindIndex(blis, firstMapIndex, map => map.BytePosition >= (long) sampleToRecordLast);
+            // lastMapIndex = lastMapIndex == -1 ? blis.Length - 1 : lastMapIndex;
+
+            var firstMapIndex = Array.FindIndex(blis, 0, map => map.SampleEnd >= (long)sampleOffset);
             firstMapIndex = firstMapIndex == -1 ? 0 : firstMapIndex;
             var lastMapIndex =
-                Array.FindIndex(blis, firstMapIndex, map => map.BytePosition >= (long) sampleToRecordLast);
+                Array.FindIndex(blis, firstMapIndex, map => map.SampleEnd > (long)sampleOffset+(long) sampleCnt);
             lastMapIndex = lastMapIndex == -1 ? blis.Length - 1 : lastMapIndex;
 
             if (lastMapIndex >= 0)
@@ -56,6 +63,13 @@ namespace MdfTools.V4
                 SampleCount = 0;
                 SampleOffset = 0;
             }
+
+            var skippedDelta = (ulong) blis[firstMapIndex].SampleIndex - sampleOffset;
+            
+            //TODO: which one do we prefer? starting at user sample or block boundary?
+            ulong realOffset = (ulong) blis[firstMapIndex].SampleIndex;
+
+
 
             var buffers = channels.Select(k => k.CreateBuffer(SampleCount)).ToArray();
             Buffers = buffers.Select(k => k.CreateView<Mdf4Channel>()).ToArray();
@@ -95,7 +109,7 @@ namespace MdfTools.V4
                     {
 #endif
                         var byteOffset = (ulong) bli.Alignment.LeftByteOffset;
-                        var sampleStart = (ulong) bli.SampleIndex;
+                        var sampleStart = (ulong) bli.SampleIndex - realOffset;
                         var sampleCount = (uint) bli.SampleCount;
 
                         for (var cIndex = 0; cIndex < channels.Length; cIndex++)
@@ -116,7 +130,7 @@ namespace MdfTools.V4
                         var byteOffset = bli.Alignment.LeftByteOffset;
                         Parallel.For(0, numThreads, i =>
                         {
-                            var sampleStart = (ulong) (bli.SampleIndex + i * split);
+                            var sampleStart = (ulong) (bli.SampleIndex + i * split) - realOffset;
                             var sampleCount = (uint) (split + rest);
 
                             for (var cIndex = 0; cIndex < channels.Length; cIndex++)
