@@ -1,7 +1,7 @@
-﻿#if RELEASE
+﻿
 #define PARALLEL
-//#define PARALLEL_GAPS
-#endif
+#define PARALLEL_GROUPS
+#define PARALLEL_GAPS
 
 using System;
 using System.Collections.Concurrent;
@@ -161,7 +161,7 @@ namespace MdfTools.V4
                         byteOffset += (int) src.RecordLength;
                     }
                 }
-#if RELEASE && PARALLEL_GAPS
+#if PARALLEL_GROUPS && PARALLEL_GAPS
                 );
 #endif
             }
@@ -175,7 +175,7 @@ namespace MdfTools.V4
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
-#if RELEASE
+#if PARALLEL_GROUPS
             Parallel.ForEach(byGroup, grouping =>
 #else
             foreach (var grouping in byGroup)
@@ -187,7 +187,7 @@ namespace MdfTools.V4
                     var smp = CreateForGroup(grouping, 0, (ulong)grpSampleCount);
                     smp.Dispose();
                 }
-#if RELEASE
+#if PARALLEL_GROUPS
             );
 #endif
         }
@@ -197,7 +197,7 @@ namespace MdfTools.V4
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
             var stuff = new ConcurrentBag<Mdf4Sampler>();
-#if RELEASE
+#if PARALLEL_GROUPS
             Parallel.ForEach(byGroup, grouping =>
 #else
             foreach (var grouping in byGroup)
@@ -207,7 +207,7 @@ namespace MdfTools.V4
                     var smp = CreateForGroup(grouping, 0, (ulong)grp.SampleCount);
                     stuff.Add(smp);
                 }
-#if RELEASE
+#if PARALLEL_GROUPS
             );
 #endif
 

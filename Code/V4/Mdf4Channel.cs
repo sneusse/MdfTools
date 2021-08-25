@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MdfTools.Shared;
 using MdfTools.Shared.Data.Base;
@@ -53,6 +54,17 @@ namespace MdfTools.V4
                 return;
 
             var p = c.Params;
+
+            if (c.Data.RefCount > 0 && p.Length != c.Data.RefCount)
+            {
+                //Hacky: we assume all parameters are present before the next linked CC Block.
+                //Hacky: we only parse the last CC Block.
+                var blk = c.Ref(c.Data.RefCount - 1) as Mdf4CCBlock;
+                if (blk != null)
+                {
+                    CreateValueConversionSpec(blk, ref val, ref disp);
+                }
+            }
 
             if (ChannelGroup.File.ConversionCache.TryGetValue(c, out var specs))
             {
