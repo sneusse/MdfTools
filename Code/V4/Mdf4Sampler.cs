@@ -228,8 +228,6 @@ namespace MdfTools.V4
             }
         }
 
-        public static Mdf4Sampler[] LoadFull(params Mdf4Channel[] channels)
-            => LoadFull((IEnumerable<Mdf4Channel>) channels);
 
 
         public static void LoadAndThrow(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
@@ -253,7 +251,7 @@ namespace MdfTools.V4
 #endif
         }
 
-        public static Mdf4Sampler[] LoadFull(IEnumerable<Mdf4Channel> channels)
+        public static Mdf4Sampler[] LoadFull(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
@@ -265,7 +263,9 @@ namespace MdfTools.V4
 #endif
                 {
                     var grp = grouping.Key;
-                    var smp = CreateForGroup(grouping, 0, (ulong) grp.SampleCount);
+                    var limit = sampleLimit == -1 ? grp.SampleCount : (ulong) sampleLimit;
+
+                    var smp = CreateForGroup(grouping, 0, limit);
                     stuff.Add(smp);
                 }
 #if PARALLEL_GROUPS
