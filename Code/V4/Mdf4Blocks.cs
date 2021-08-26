@@ -26,14 +26,14 @@ namespace MdfTools.V4
         public ushort IdVer;
         public fixed byte IdReserved2[4];
         public ushort IdUnfinFlags;
-        
+
         public string IdFileStr
         {
             get
             {
                 fixed (byte* p = IdFile)
                 {
-                    return new string((sbyte*)p,0,8);
+                    return new string((sbyte*) p, 0, 8);
                 }
             }
         }
@@ -196,47 +196,65 @@ namespace MdfTools.V4
                 // overhead for basically everything I have right now is bigger than the speedup.
                 // maybe if we have some files with 2/4/8MB blocks? Test when we have such a file.
 
-                if (fullBuffer.Length > 2 * 1024 * 1024)
+                if (fullBuffer.Length > 20 * 1024 * 1024)
                 {
-                    Parallel.For(0, columns, c =>
+                    unsafe
                     {
-                        // for (int c = 0; c < columns; c++)
-                        // {
-                        //     var transposedIndex = (int) rows * c + r;
-                        //     fullBuffer[offset + transposedIndex] = transposedData[c];
-                        // }
-                        unsafe
+                        const int block = 32 * 8;
+                        fixed (byte* bufferStart = fullBuffer)
+                        fixed (byte* fsrc = transposedData)
                         {
-                            fixed (byte* bufferStart = fullBuffer)
+                            var dst = bufferStart + offset;
+                            var src = fsrc;
+
+                            Parallel.For(0, rows / block, l =>
                             {
-                                var b = bufferStart + offset + c * rows;
-                                for (var r = 0; r < rows; r++)
+                                int i = (int) l * block;
+                                for (var j = 0; j < columns; ++j)
                                 {
-                                    var transposedIndex = columns * r + c;
-                                    *b++ = transposedData[transposedIndex];
+                                    for (var b = 0; b < block && i + b < rows; ++b)
+                                    {
+                                        dst[j * rows + i + b] = src[(i + b) * columns + j];
+                                    }
                                 }
-                            }
+                            });
                         }
-                    });
+                    }
                 }
                 else
                 {
                     unsafe
                     {
+                        // fixed (byte* bufferStart = fullBuffer)
+                        // {
+                        //     var b = bufferStart + offset; 
+                        //     for (var c = 0; c < columns; c++)
+                        //     for (var r = 0; r < rows; r++)
+                        //     {
+                        //         var transposedIndex = columns * r + c;
+                        //         *b++ = transposedData[transposedIndex];
+                        //     }
+                        // }
+
+
+                        const int block = 32 * 8;
                         fixed (byte* bufferStart = fullBuffer)
+                        fixed (byte* src = transposedData)
                         {
-                            var b = bufferStart + offset; 
-                            for (var c = 0; c < columns; c++)
-                            for (var r = 0; r < rows; r++)
+                            var dst = bufferStart + offset;
+                            for (var i = 0; i < rows; i += block)
                             {
-                                var transposedIndex = columns * r + c;
-                                *b++ = transposedData[transposedIndex];
+                                for (var j = 0; j < columns; ++j)
+                                {
+                                    for (var b = 0; b < block && i + b < rows; ++b)
+                                    {
+                                        dst[j * rows + i + b] = src[(i + b) * columns + j];
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
-              
 
 
                 // remaining untransposed stuff:
@@ -312,6 +330,7 @@ namespace MdfTools.V4
         public Mdf4DataBlock this[int index] => this;
 
         public uint BlockCount => 1;
+
         public IEnumerable<Mdf4DataBlock> GetAllDataBlocks()
         {
             yield return this;

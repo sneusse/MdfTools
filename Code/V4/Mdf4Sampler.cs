@@ -29,7 +29,7 @@ namespace MdfTools.V4
         }
 
 
-        internal Mdf4Sampler(IEnumerable<Mdf4Channel> chanz, ulong sampleOffset, ulong sampleCnt)
+        internal Mdf4Sampler(IEnumerable<Mdf4Channel> chanz, ulong sampleOffset, ulong sampleCnt, int blockStride = 1)
         {
             var channels = chanz.ToArray();
 
@@ -277,9 +277,9 @@ namespace MdfTools.V4
         /// <param name="firstSample">The first sample (index)</param>
         /// <param name="sampleCnt">Number of samples to decode</param>
         /// <returns>A sampler object containing the buffers</returns>
-        public static Mdf4Sampler CreateForGroup(IEnumerable<Mdf4Channel> channels, ulong firstSample, ulong sampleCnt)
+        public static Mdf4Sampler CreateForGroup(IEnumerable<Mdf4Channel> channels, ulong firstSample, ulong sampleCnt, int blockStride = 1)
         {
-            return new Mdf4Sampler(channels, firstSample, sampleCnt);
+            return new Mdf4Sampler(channels, firstSample, sampleCnt, blockStride);
         }
 
         public void Dispose()
