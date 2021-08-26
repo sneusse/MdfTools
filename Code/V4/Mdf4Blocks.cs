@@ -198,7 +198,7 @@ namespace MdfTools.V4
 
                 if (fullBuffer.Length > 2 * 1024 * 1024)
                 {
-                    Parallel.For(0, rows, r =>
+                    Parallel.For(0, columns, c =>
                     {
                         // for (int c = 0; c < columns; c++)
                         // {
@@ -209,8 +209,8 @@ namespace MdfTools.V4
                         {
                             fixed (byte* bufferStart = fullBuffer)
                             {
-                                var b = bufferStart + offset + columns * r;
-                                for (var c = 0; c < columns; c++)
+                                var b = bufferStart + offset + c * rows;
+                                for (var r = 0; r < rows; r++)
                                 {
                                     var transposedIndex = columns * r + c;
                                     *b++ = transposedData[transposedIndex];
@@ -225,9 +225,9 @@ namespace MdfTools.V4
                     {
                         fixed (byte* bufferStart = fullBuffer)
                         {
-                            var b = bufferStart + offset;
-                            for (var r = 0; r < rows; r++)
+                            var b = bufferStart + offset; 
                             for (var c = 0; c < columns; c++)
+                            for (var r = 0; r < rows; r++)
                             {
                                 var transposedIndex = columns * r + c;
                                 *b++ = transposedData[transposedIndex];

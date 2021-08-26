@@ -48,10 +48,10 @@ namespace MdfTools.V4
             //     Array.FindIndex(blis, firstMapIndex, map => map.BytePosition >= (long) sampleToRecordLast);
             // lastMapIndex = lastMapIndex == -1 ? blis.Length - 1 : lastMapIndex;
 
-            var firstMapIndex = Array.FindIndex(blis, 0, map => map.SampleEnd >= (long) sampleOffset);
+            var firstMapIndex = Array.FindIndex(blis, 0, map => (ulong) map.SampleEnd >= sampleOffset);
             firstMapIndex = firstMapIndex == -1 ? 0 : firstMapIndex;
             var lastMapIndex =
-                Array.FindIndex(blis, firstMapIndex, map => map.SampleEnd >= (long) sampleOffset + (long) sampleCnt);
+                Array.FindIndex(blis, firstMapIndex, map => (ulong) map.SampleEnd >= sampleOffset + sampleCnt);
             lastMapIndex = lastMapIndex == -1 ? blis.Length - 1 : lastMapIndex;
 
             if (lastMapIndex >= 0)
@@ -136,9 +136,8 @@ namespace MdfTools.V4
 
                     //TODO: find better metric -.-
                     var threadMetric = bli.SampleCount * channels.Length;
-                    var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
-
-
+                    var threadCount = 1; // (int) Math.Ceiling(threadMetric / 100000.0);
+                    
 #if PARALLEL
                     //NORMAL VERSION
                     if (threadCount <= 1)
@@ -156,7 +155,7 @@ namespace MdfTools.V4
 #if PARALLEL
                     }
 
-                    // THREADED VERSION
+                    // THREADED VERSION (broken atm, why?)
                     else
                     {
                         var numThreads = threadCount;
