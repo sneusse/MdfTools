@@ -84,11 +84,17 @@ namespace MdfTools.V4
             var parser = new Mdf4Parser(filename);
             var mf4 = parser.Open().PrepareForMultiThreading();
             var buffers = Mdf4Sampler.LoadFull(mf4.ChannelGroups.SelectMany(k => k.Channels));
-            // Mdf4Sampler.LoadAndThrow(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
-            var elapsed = sw.Elapsed.TotalSeconds;
-
+            sw.Stop();
 
             var metrics = Metrics;
+
+            var elapsed = sw.Elapsed.TotalSeconds;
+            var totalBytesLoaded = metrics.CopyRawData.Value0;
+            var totalBytesDecompressed = metrics.CopyRawData.Value1;
+            var totalSamples = buffers.Select(k => k.SampleCount * k.Buffers.Length).Sum();
+            var totalBytesBuffered = totalSamples * 8;
+            var totalBytesProcessed = totalBytesLoaded + totalBytesBuffered;
+
             if (@short)
             {
                 Console.WriteLine($"{FormatUtils.GetBytesReadable(metrics.SampleReading.Value0, "samples")}" +
@@ -104,11 +110,15 @@ namespace MdfTools.V4
                 Console.WriteLine($"# Channels in file : {mf4.ChannelGroups.SelectMany(k => k.Channels).Count()}");
                 // Console.WriteLine($"# Channels loaded  : {buffers.Select(k => k.Channel).Distinct().Count()}");
                 Console.WriteLine("-- Data.............");
-                Console.WriteLine($"Raw-bytes loaded   : {FormatUtils.GetBytesReadable(metrics.CopyRawData.Value0)}");
-                Console.WriteLine($"Zip-bytes loaded   : {FormatUtils.GetBytesReadable(metrics.ExtractAndTranspose.Value0)}");
-                Console.WriteLine($"Samples loaded     : {FormatUtils.GetBytesReadable(metrics.SampleReading.Value0, "samples")}");
-                Console.WriteLine($"Read speed         : {FormatUtils.GetBytesReadable((long) (metrics.SampleReading.Value1 / elapsed))}ps");
-                Console.WriteLine($"Allocations        : {FormatUtils.GetBytesReadable(metrics.Allocations.Value0)}");
+                Console.WriteLine($"Bytes loaded       : {FormatUtils.GetBytesReadable(totalBytesLoaded)}");
+                Console.WriteLine($"Bytes decompressed : {FormatUtils.GetBytesReadable(totalBytesDecompressed)}");
+                Console.WriteLine($"Samples loaded     : {FormatUtils.GetBytesReadable(totalSamples, "samples")}");
+                Console.WriteLine($"Read speed         : {FormatUtils.GetBytesReadable((long) (totalBytesLoaded / elapsed))}ps");
+                Console.WriteLine($"Parse speed        : {FormatUtils.GetBytesReadable((long) (totalBytesDecompressed / elapsed))}ps");
+                Console.WriteLine($"Sample speed       : {FormatUtils.GetBytesReadable((long) (totalSamples / elapsed), "S")}ps");
+                Console.WriteLine($"Allocations        : {FormatUtils.GetBytesReadable(totalBytesBuffered)}");
+                Console.WriteLine($"Bytes processed    : {FormatUtils.GetBytesReadable(totalBytesProcessed)}");
+                Console.WriteLine($"Bytes processed/s  : {FormatUtils.GetBytesReadable((long) (totalBytesProcessed / elapsed))}ps");
                 Console.WriteLine("-- Times............");
                 Console.WriteLine($"Full load time     : {elapsed:N1}s");
                 Console.WriteLine($"Time opening       : {metrics.TimeOpening}");

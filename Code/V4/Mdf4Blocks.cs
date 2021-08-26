@@ -137,7 +137,7 @@ namespace MdfTools.V4
 
         public override int CopyTo(byte[] fullBuffer, int offset)
         {
-            using var time = Mdf4File.Metrics.CopyRawData.Measure(BlockDataLength);
+            using var time = Mdf4File.Metrics.CopyRawData.Measure(BlockDataLength, BlockDataLength);
 
             // this is painfully slow.
             // Reader.ReadArray(BlockDataOffset, ref fullBuffer, offset, (int) BlockDataLength);
@@ -179,7 +179,7 @@ namespace MdfTools.V4
 
         public override int CopyTo(byte[] fullBuffer, int offset)
         {
-            using var time = Mdf4File.Metrics.ExtractAndTranspose.Measure((long) Data.UncompressedDataLength);
+            using var time = Mdf4File.Metrics.CopyRawData.Measure((long)Data.CompressedDataLength, (long)Data.UncompressedDataLength);
 
             if (Data.ZipType == ZipType.TranspositionDeflate)
             {
@@ -195,6 +195,8 @@ namespace MdfTools.V4
 
                 // overhead for basically everything I have right now is bigger than the speedup.
                 // maybe if we have some files with 2/4/8MB blocks? Test when we have such a file.
+
+                using var transposetime = Mdf4File.Metrics.ExtractAndTranspose.Measure((long)Data.UncompressedDataLength, (long)Data.CompressedDataLength);
 
                 if (fullBuffer.Length > 20 * 1024 * 1024)
                 {

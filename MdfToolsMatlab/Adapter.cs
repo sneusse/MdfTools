@@ -233,7 +233,7 @@ namespace MdfToolsMatlab
             var chans = Channels.Select(k => k.Org).ToArray();
             var toLoad = masters.Concat(chans).Distinct().ToArray();
 
-            var smp = Mdf4Sampler.LoadFull(toLoad);
+            var smp = Mdf4Sampler.LoadFull(toLoad).SelectMany(k => k.Buffers).ToArray();
             var grouped = smp.ToDictionary(k => k.Channel, k => k);
 
             MdfBufferAdapter[] adapters = new MdfBufferAdapter[smp.Length];

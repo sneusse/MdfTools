@@ -111,8 +111,8 @@ namespace MdfTools.V4
             foreach (BlockId blockId in Enum.GetValues(typeof(BlockId)))
                 Console.WriteLine($"Block {blockId}: {stats[blockId]} (zipped: {zstats[blockId]})");
 
-            Console.WriteLine($"Raw data: ${FormatUtils.GetBytesReadable((long)rawData)}");
-            Console.WriteLine($"Zip data: ${FormatUtils.GetBytesReadable((long)zipData)}");
+            Console.WriteLine($"Raw data: {FormatUtils.GetBytesReadable((long)rawData)}");
+            Console.WriteLine($"Zip data: {FormatUtils.GetBytesReadable((long)zipData)}");
         }
 
 

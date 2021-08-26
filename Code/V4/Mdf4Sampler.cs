@@ -39,6 +39,13 @@ namespace MdfTools.V4
             var blis = src.BlockLoadingInfos;
 
 
+            if (blis.Length == 0)
+            {
+                Buffers = Array.Empty<BufferView<Mdf4Channel>>();
+                return;
+            }
+
+
             //TODO: Auf binarysearch umstellen....
             // var sampleToRecordFirst = sampleOffset * recLen;
             // var sampleToRecordLast = (sampleOffset + sampleCnt) * recLen;
@@ -132,11 +139,13 @@ namespace MdfTools.V4
                     blk.CopyTo(recordBuffer, 0);
                     bli.CopyGaps(recordBuffer, src.GapBuffer);
 
-                    Interlocked.Add(ref BytesLoaded, recordBuffer.Length);
+                    Interlocked.Add(ref BytesLoaded, blk.ByteLength);
 
                     //TODO: find better metric -.-
                     var threadMetric = bli.SampleCount * channels.Length;
-                    var threadCount = 1; // (int) Math.Ceiling(threadMetric / 100000.0);
+                    var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
+                    if (threadCount > 10)
+                        threadCount = 10;
                     
 #if PARALLEL
                     //NORMAL VERSION
@@ -219,7 +228,7 @@ namespace MdfTools.V4
             }
         }
 
-        public static BufferView<Mdf4Channel>[] LoadFull(params Mdf4Channel[] channels)
+        public static Mdf4Sampler[] LoadFull(params Mdf4Channel[] channels)
             => LoadFull((IEnumerable<Mdf4Channel>) channels);
 
 
@@ -244,7 +253,7 @@ namespace MdfTools.V4
 #endif
         }
 
-        public static BufferView<Mdf4Channel>[] LoadFull(IEnumerable<Mdf4Channel> channels)
+        public static Mdf4Sampler[] LoadFull(IEnumerable<Mdf4Channel> channels)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
@@ -263,7 +272,7 @@ namespace MdfTools.V4
             );
 #endif
 
-            return stuff.SelectMany(k => k.Buffers).ToArray();
+            return stuff.ToArray();
         }
 
         /// <summary>
