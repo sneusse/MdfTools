@@ -23,12 +23,6 @@ namespace MdfTools.V4
 
         public BufferView<Mdf4Channel>[] Buffers { get; }
 
-        internal Mdf4Sampler(IEnumerable<Mdf4Channel> channels)
-        {
-            var channelsByGroup = channels.GroupBy(k => k.ChannelGroup);
-        }
-
-
         internal Mdf4Sampler(IEnumerable<Mdf4Channel> chanz, ulong sampleOffset, ulong sampleCnt, int blockStride = 1)
         {
             var channels = chanz.ToArray();
@@ -164,7 +158,7 @@ namespace MdfTools.V4
 #if PARALLEL
                     }
 
-                    // THREADED VERSION (broken atm, why?)
+                    // THREADED VERSION
                     else
                     {
                         var numThreads = threadCount;
@@ -228,30 +222,7 @@ namespace MdfTools.V4
             }
         }
 
-
-
-        public static void LoadAndThrow(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
-        {
-            var byGroup = channels.GroupBy(k => k.ChannelGroup);
-
-#if PARALLEL_GROUPS
-            Parallel.ForEach(byGroup, grouping =>
-#else
-            foreach (var grouping in byGroup)
-#endif
-                {
-                    var grp = grouping.Key;
-                    var grpSampleCount = sampleLimit == -1 ? (long) grp.SampleCount : sampleLimit;
-
-                    var smp = CreateForGroup(grouping, 0, (ulong) grpSampleCount);
-                    smp.Dispose();
-                }
-#if PARALLEL_GROUPS
-            );
-#endif
-        }
-
-        public static Mdf4Sampler[] LoadFull(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
+        public static Mdf4Sampler[] CreateMany(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)
         {
             var byGroup = channels.GroupBy(k => k.ChannelGroup);
 
@@ -265,7 +236,7 @@ namespace MdfTools.V4
                     var grp = grouping.Key;
                     var limit = sampleLimit == -1 ? grp.SampleCount : (ulong) sampleLimit;
 
-                    var smp = CreateForGroup(grouping, 0, limit);
+                    var smp = CreateForSingleGroup(grouping, 0, limit);
                     stuff.Add(smp);
                 }
 #if PARALLEL_GROUPS
@@ -286,7 +257,7 @@ namespace MdfTools.V4
         /// <param name="firstSample">The first sample (index)</param>
         /// <param name="sampleCnt">Number of samples to decode</param>
         /// <returns>A sampler object containing the buffers</returns>
-        public static Mdf4Sampler CreateForGroup(IEnumerable<Mdf4Channel> channels, ulong firstSample, ulong sampleCnt, int blockStride = 1)
+        public static Mdf4Sampler CreateForSingleGroup(IEnumerable<Mdf4Channel> channels, ulong firstSample, ulong sampleCnt, int blockStride = 1)
         {
             return new Mdf4Sampler(channels, firstSample, sampleCnt, blockStride);
         }
