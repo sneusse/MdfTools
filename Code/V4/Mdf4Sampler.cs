@@ -14,8 +14,26 @@ using MdfTools.Shared.Data.Base;
 
 namespace MdfTools.V4
 {
+    public static class MissingStuff
+    {
+        public static IEnumerable<IReadOnlyList<T>> ChunkList<T>(this IEnumerable<T> items, int chunkSize)
+        {
+            List<T> tmp = new List<T>(chunkSize);
+            foreach (var item in items)
+            {
+                tmp.Add(item);
+                if (tmp.Count >= chunkSize)
+                {
+                    yield return tmp;
+                    tmp = new List<T>(chunkSize);
+                }
+            }
+        }
+    }
+
     public class Mdf4Sampler : IDisposable
     {
+
         public long SampleOffset { get; }
         public long SampleCount { get; }
         public long BytesLoaded;
@@ -161,20 +179,17 @@ namespace MdfTools.V4
                     // THREADED VERSION
                     else
                     {
-                        var numThreads = threadCount;
-                        var split = bli.SampleCount / numThreads;
-                        var rest = bli.SampleCount % numThreads;
-
+                        var chunks = Buffers.ChunkList(channels.Length / threadCount);
                         var byteOffset = bli.Alignment.LeftByteOffset;
-                        Parallel.For(0, numThreads, i =>
-                        {
-                            var sampleStart = (ulong) (bli.SampleIndex + i * split) - realOffset;
-                            var sampleCount = (uint) (split + rest);
+                        var sampleStart = (ulong)bli.SampleIndex - realOffset;
+                        var sampleCount = (uint)bli.SampleCount;
 
-                            for (var cIndex = 0; cIndex < channels.Length; cIndex++)
+                        Parallel.ForEach(chunks, chunkedChannels =>
+                        {
+                            foreach (var bufferView in chunkedChannels)
                             {
-                                var buffer = buffers[cIndex];
-                                buffer.Update(recordBuffer, (ulong) byteOffset, sampleStart, sampleCount);
+                                var buffer = bufferView.Original;
+                                buffer.Update(recordBuffer, (ulong)byteOffset, sampleStart, sampleCount);
                             }
                         });
                     }
