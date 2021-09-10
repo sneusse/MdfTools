@@ -179,7 +179,7 @@ namespace MdfTools.V4
 
         public override int CopyTo(byte[] fullBuffer, int offset)
         {
-            using var time = Mdf4File.Metrics.CopyRawData.Measure((long)Data.CompressedDataLength, (long)Data.UncompressedDataLength);
+            using var time = Mdf4File.Metrics.CopyRawData.Measure((long) Data.CompressedDataLength, (long) Data.UncompressedDataLength);
 
             if (Data.ZipType == ZipType.TranspositionDeflate)
             {
@@ -196,7 +196,7 @@ namespace MdfTools.V4
                 // overhead for basically everything I have right now is bigger than the speedup.
                 // maybe if we have some files with 2/4/8MB blocks? Test when we have such a file.
 
-                using var transposetime = Mdf4File.Metrics.ExtractAndTranspose.Measure((long)Data.UncompressedDataLength, (long)Data.CompressedDataLength);
+                using var transposetime = Mdf4File.Metrics.ExtractAndTranspose.Measure((long) Data.UncompressedDataLength, (long) Data.CompressedDataLength);
 
                 if (fullBuffer.Length > 20 * 1024 * 1024)
                 {
@@ -367,14 +367,26 @@ namespace MdfTools.V4
 
         public IEnumerable<DataBlockMap> GetBlockMap()
         {
+            uint eqidx = 0;
             foreach (var mdfDlBlock in DlBlocksWithSelf)
+            {
                 if (mdfDlBlock.EqualLength > 0)
+                {
                     for (uint i = 0; i < mdfDlBlock.BlockCount; i++)
-                        yield return new DataBlockMap(mdfDlBlock.Links[i + 1], (long) (i * mdfDlBlock.EqualLength),
+                    {
+                        eqidx++;
+                        yield return new DataBlockMap(mdfDlBlock.Links[i + 1], (long) (eqidx * mdfDlBlock.EqualLength),
                             Parser);
+                    }
+                }
                 else
+                {
                     for (uint i = 0; i < mdfDlBlock.BlockCount; i++)
+                    {
                         yield return new DataBlockMap(mdfDlBlock.Links[i + 1], mdfDlBlock.BlockOffsets[i], Parser);
+                    }
+                }
+            }
         }
 
         public Mdf4DataBlock this[int index] => LinkTo<Mdf4DataBlock>(Links[index + 1]);

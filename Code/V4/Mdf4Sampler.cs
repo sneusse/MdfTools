@@ -208,7 +208,7 @@ namespace MdfTools.V4
                 var bli = blis[i];
 
                 ulong gapSample = (ulong) (bli.SampleEnd);
-                if (gapSample >= (sampleOffset + sampleCnt))
+                if (gapSample >= (ulong) (SampleOffset + SampleCount))
                     return;
 
                 if (bli.RightGapBuffer != null)

@@ -42,18 +42,18 @@ namespace MdfTools.V4
             var infos = _dgBlock
                         .DataRoot?
                         .GetBlockMap()?
-                        .Select(k => new BlockLoadingInfo(k)).ToArray() ??
-                        Array.Empty<BlockLoadingInfo>();
+                        .Select(k => new BlockLoadingInfo(k))
+                        .ToArray() ?? Array.Empty<BlockLoadingInfo>();
 
             if (infos.Length == 0)
                 return infos;
 
-            var indices = new List<int>();
             long gapBufferIndex = 0;
 
             byte[] prevGapBuffer = null;
-            foreach (var info in infos)
+            for (var index = 0; index < infos.Length; index++)
             {
+                var info = infos[index];
                 info.LeftGapBuffer = prevGapBuffer;
 
                 var blockByteLength = info.ByteLength;
@@ -72,13 +72,14 @@ namespace MdfTools.V4
                 info.SampleCount = (blockByteLength - leftAlignment - rightAlignment) / RecordLength;
                 info.SampleIndex = (blockByteStart + leftAlignment) / RecordLength;
 
+                if (info.BytePosition == 0 && index > 0)
+                    Debugger.Break();
+
                 if (rightAlignment > 0)
                 {
-                    // allocate 'a little bit more' as we always read 8 bytes
                     info.RightGapBuffer = new byte[RecordLength];
-                    indices.Add((int) info.SampleEnd);
                 }
-                
+
                 prevGapBuffer = info.RightGapBuffer;
             }
 
