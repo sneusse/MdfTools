@@ -83,7 +83,7 @@ namespace MdfTools.V4
             Metrics = new PerfMetrics();
             var parser = new Mdf4Parser(filename);
             var mf4 = parser.Open().PrepareForMultiThreading();
-            var buffers = Mdf4Sampler.CreateMany(mf4.ChannelGroups.SelectMany(k => k.Channels));
+            var buffers = Mdf4Sampler.CreateMany(mf4.ChannelGroups.SelectMany(k => k.Channels), sampleLimit);
             sw.Stop();
 
             var metrics = Metrics;
