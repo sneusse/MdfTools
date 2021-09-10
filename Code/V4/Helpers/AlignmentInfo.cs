@@ -4,7 +4,5 @@
     {
         internal int LeftByteOffset;
         internal int RightByteOffset;
-        internal int LeftGapIndex;
-        internal int RightGapIndex;
     }
 }
