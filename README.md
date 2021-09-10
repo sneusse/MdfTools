@@ -101,52 +101,54 @@ A MDF 4.x Reader (for now)
 ```
 
 -- File Info........
-# Groups in file   : 112
-# Groups loaded    : 112
-# Channels in file : 3777
-# Channels loaded  : 3777
+# Groups in file   : 561
+# Channels in file : 11649
 -- Data.............
-Raw-bytes loaded   : 2,614 GB
-Zip-bytes loaded   : 0 B
-Samples loaded     : 22,809 Msamples
-Read speed         : 1,158 GBps
-Allocations        : 8,828 GB
+Bytes loaded       : 238,131 MB
+Bytes decompressed : 1,495 GB
+Samples loaded     : 968,543 Msamples
+Read speed         : 75,732 MBps
+Parse speed        : 487,097 MBps
+Sample speed       : 308,023 MSps
+Allocations        : 7,566 GB
+Bytes processed    : 7,799 GB
+Bytes processed/s  : 2,479 GBps
 -- Times............
-Full load time     : 2,3s
-Time opening       : CPU:3ms RT: 11066ms-11069ms
-Block creation     : CPU:59ms RT: 11066ms-11160ms
-BLI construction   : CPU:55ms RT: 11069ms-11124ms
-Raw copies         : CPU:2638ms RT: 11161ms-13321ms
-Inflate/Transpose  : CPU:0ms RT: -1ms--1ms
-SampleReading      : CPU:10169ms RT: 11161ms-13321ms
-Allocations        : CPU:114ms RT: 11161ms-13320ms
+Full load time     : 3,1s
+Time opening       : CPU:28ms RT: 15ms/43ms
+Block creation     : CPU:363ms RT: 16ms/534ms
+BLI construction   : CPU:431ms RT: 45ms/476ms
+Raw copies         : CPU:10235ms RT: 569ms/3143ms
+Inflate/Transpose  : CPU:6833ms RT: 571ms/3143ms
+SampleReading      : CPU:19210ms RT: 561ms/3144ms
+Allocations        : CPU:344ms RT: 559ms/3131ms
 -- Parser stuff.....
-Format version 4.0
-Block MdfBlockCA: 0 (zipped: 0)
-Block MdfBlockCC: 637 (zipped: 0)
-Block MdfBlockHD: 1 (zipped: 0)
-Block MdfBlockLD: 0 (zipped: 0)
-Block MdfBlockMD: 3780 (zipped: 0)
-Block MdfBlockRD: 0 (zipped: 0)
-Block MdfBlockSD: 0 (zipped: 0)
-Block MdfBlockCG: 112 (zipped: 0)
-Block MdfBlockDG: 112 (zipped: 0)
-Block MdfBlockCH: 0 (zipped: 0)
-Block MdfBlockFH: 2 (zipped: 0)
-Block MdfBlockDI: 0 (zipped: 0)
-Block MdfBlockRI: 0 (zipped: 0)
-Block MdfBlockSI: 3889 (zipped: 0)
-Block MdfBlockDL: 154 (zipped: 0)
-Block MdfBlockHL: 0 (zipped: 0)
-Block MdfBlockCN: 3777 (zipped: 0)
-Block MdfBlockSR: 0 (zipped: 0)
-Block MdfBlockAT: 0 (zipped: 0)
-Block MdfBlockDT: 19480 (zipped: 0)
-Block MdfBlockDV: 0 (zipped: 0)
-Block MdfBlockEV: 1 (zipped: 0)
-Block MdfBlockRV: 0 (zipped: 0)
-Block MdfBlockTX: 21625 (zipped: 0)
-Block MdfBlockDZ: 0 (zipped: 0)
+Format version 4.10
+Block MdfBlockCA: 0
+Block MdfBlockCC: 2485
+Block MdfBlockHD: 1
+Block MdfBlockLD: 0
+Block MdfBlockMD: 11653
+Block MdfBlockRD: 0
+Block MdfBlockSD: 0
+Block MdfBlockCG: 561
+Block MdfBlockDG: 561
+Block MdfBlockCH: 0
+Block MdfBlockFH: 3
+Block MdfBlockDI: 0
+Block MdfBlockRI: 0
+Block MdfBlockSI: 12210
+Block MdfBlockDL: 732
+Block MdfBlockHL: 507
+Block MdfBlockCN: 11649
+Block MdfBlockSR: 0
+Block MdfBlockAT: 1
+Block MdfBlockDT: 207 (zipped: 136604)
+Block MdfBlockDV: 0
+Block MdfBlockEV: 1
+Block MdfBlockRV: 0
+Block MdfBlockTX: 56926
+Block MdfBlockDZ: 136604
 
 ```
 
