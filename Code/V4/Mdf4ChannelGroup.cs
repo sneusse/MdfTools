@@ -16,9 +16,6 @@ namespace MdfTools.V4
 
         private BlockLoadingInfo[] _blockLoadingInfos;
 
-        internal byte[] GapBuffer;
-        internal int[] GapIndexToSampleIndex;
-
         public Mdf4File File { get; }
 
         public IReadOnlyList<Mdf4Channel> Channels => _channels;
@@ -52,9 +49,13 @@ namespace MdfTools.V4
                 return infos;
 
             var indices = new List<int>();
-            var gapBufferIndex = 0;
+            long gapBufferIndex = 0;
+
+            byte[] prevGapBuffer = null;
             foreach (var info in infos)
             {
+                info.LeftGapBuffer = prevGapBuffer;
+
                 var blockByteLength = info.ByteLength;
                 var blockByteStart = info.BytePosition;
 
@@ -65,27 +66,24 @@ namespace MdfTools.V4
                 alignment.LeftByteOffset = (int) leftAlignment;
                 alignment.RightByteOffset = (int) rightAlignment;
 
-                alignment.LeftGapIndex = gapBufferIndex;
                 gapBufferIndex += alignment.LeftByteOffset;
-                alignment.RightGapIndex = gapBufferIndex;
                 gapBufferIndex += alignment.RightByteOffset;
 
                 info.SampleCount = (blockByteLength - leftAlignment - rightAlignment) / RecordLength;
                 info.SampleIndex = (blockByteStart + leftAlignment) / RecordLength;
 
-                if (rightAlignment > 0) indices.Add((int) info.SampleEnd);
+                if (rightAlignment > 0)
+                {
+                    // allocate 'a little bit more' as we always read 8 bytes
+                    info.RightGapBuffer = new byte[RecordLength];
+                    indices.Add((int) info.SampleEnd);
+                }
+                
+                prevGapBuffer = info.RightGapBuffer;
             }
 
             // that's the reason we did this...
             Debug.Assert(gapBufferIndex % RecordLength == 0);
-
-            var gapRecords = (int) (gapBufferIndex / RecordLength);
-
-            // allocate 'a little bit more' as we always read 8 bytes
-            if (gapBufferIndex > 0)
-                GapBuffer = new byte[gapBufferIndex + 8]; // last index == length 
-
-            GapIndexToSampleIndex = indices.ToArray();
 
             return infos;
         }

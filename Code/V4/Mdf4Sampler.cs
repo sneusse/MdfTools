@@ -33,7 +33,6 @@ namespace MdfTools.V4
 
     public class Mdf4Sampler : IDisposable
     {
-
         public long SampleOffset { get; }
         public long SampleCount { get; }
         public long BytesLoaded;
@@ -149,7 +148,7 @@ namespace MdfTools.V4
                     // allocate 'a little bit more' as we always read 8 bytes
                     var recordBuffer = MdfBufferPool.Rent(blk.ByteLength + 8);
                     blk.CopyTo(recordBuffer, 0);
-                    bli.CopyGaps(recordBuffer, src.GapBuffer);
+                    bli.CopyGaps(recordBuffer);
 
                     Interlocked.Add(ref BytesLoaded, blk.ByteLength);
 
@@ -158,7 +157,7 @@ namespace MdfTools.V4
                     var threadCount = (int) Math.Ceiling(threadMetric / 100000.0);
                     if (threadCount > 10)
                         threadCount = 10;
-                    
+
 #if PARALLEL
                     //NORMAL VERSION
                     if (threadCount <= 1)
@@ -181,15 +180,15 @@ namespace MdfTools.V4
                     {
                         var chunks = Buffers.ChunkList(channels.Length / threadCount);
                         var byteOffset = bli.Alignment.LeftByteOffset;
-                        var sampleStart = (ulong)bli.SampleIndex - realOffset;
-                        var sampleCount = (uint)bli.SampleCount;
+                        var sampleStart = (ulong) bli.SampleIndex - realOffset;
+                        var sampleCount = (uint) bli.SampleCount;
 
                         Parallel.ForEach(chunks, chunkedChannels =>
                         {
                             foreach (var bufferView in chunkedChannels)
                             {
                                 var buffer = bufferView.Original;
-                                buffer.Update(recordBuffer, (ulong)byteOffset, sampleStart, sampleCount);
+                                buffer.Update(recordBuffer, (ulong) byteOffset, sampleStart, sampleCount);
                             }
                         });
                     }
@@ -202,39 +201,28 @@ namespace MdfTools.V4
 #endif
             );
 #endif
-            if (src.GapBuffer != null && src.GapBuffer.Length > 0)
+
+            Parallel.For(firstMapIndex, lastMapIndex + 1, i => 
+            // for (var i = firstMapIndex; i <= lastMapIndex; ++i)
             {
-                var firstSample = 0;
-                var lastSample = (int) SampleCount;
+                var bli = blis[i];
 
-                // TODO: Binarysearch.
-                var firstGap = Array.FindIndex(src.GapIndexToSampleIndex, i => i >= firstSample);
-                var lastGap = Array.FindIndex(src.GapIndexToSampleIndex, i => i >= lastSample);
+                ulong gapSample = (ulong) (bli.SampleEnd);
+                if (gapSample >= (sampleOffset + sampleCnt))
+                    return;
 
-                //TODO: fix checks (out of range, before, after, ...)
-                firstGap = firstGap == -1 ? 0 : firstGap;
-                lastGap = lastGap == -1 ? src.GapIndexToSampleIndex.Length : lastGap;
-
-#if PARALLEL && PARALLEL_GAPS
-                Parallel.For(0, channels.Length, cIndex =>
-#else
-                for (var cIndex = 0; cIndex < channels.Length; cIndex++)
-#endif
+                if (bli.RightGapBuffer != null)
+                {
+                    for (var cIndex = 0; cIndex < channels.Length; cIndex++)
                     {
-                        var sampleBuffer = buffers[cIndex];
-                        var byteOffset = firstGap * src.RecordLength;
+                        var buffer = buffers[cIndex];
 
-                        for (var gapIndex = firstGap; gapIndex < lastGap; gapIndex++)
-                        {
-                            sampleBuffer.Update(src.GapBuffer, (ulong) byteOffset,
-                                (ulong) src.GapIndexToSampleIndex[gapIndex], 1);
-                            byteOffset += (int) src.RecordLength;
-                        }
+                        buffer.Update(bli.RightGapBuffer, 0, (ulong) (gapSample), 1);
                     }
-#if PARALLEL && PARALLEL_GAPS
-                );
-#endif
+                }
             }
+
+            );
         }
 
         public static Mdf4Sampler[] CreateMany(IEnumerable<Mdf4Channel> channels, long sampleLimit = -1)

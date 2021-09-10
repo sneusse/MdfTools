@@ -8,6 +8,8 @@ namespace MdfTools.V4.Helpers
         internal long SampleCount;
 
         internal long SampleIndex;
+        internal byte[] LeftGapBuffer;
+        internal byte[] RightGapBuffer;
 
         internal Mdf4DataBlock Block { get; }
         public long BytePosition { get; }
@@ -20,16 +22,17 @@ namespace MdfTools.V4.Helpers
             BytePosition = map.RawRecordOffset;
         }
 
-        internal void CopyGaps(byte[] recordBuffer, byte[] gapBuffer)
+        internal void CopyGaps(byte[] recordBuffer)
         {
             if (Alignment.LeftByteOffset > 0)
-                Unsafe.CopyBlock(ref gapBuffer[Alignment.LeftGapIndex], ref recordBuffer[0],
-                                 (uint) Alignment.LeftByteOffset);
+                Unsafe.CopyBlock(ref LeftGapBuffer[LeftGapBuffer.Length - Alignment.LeftByteOffset],
+                    ref recordBuffer[0],
+                    (uint) Alignment.LeftByteOffset);
 
             if (Alignment.RightByteOffset > 0)
-                Unsafe.CopyBlock(ref gapBuffer[Alignment.RightGapIndex],
-                                 ref recordBuffer[ByteLength - Alignment.RightByteOffset],
-                                 (uint) Alignment.RightByteOffset);
+                Unsafe.CopyBlock(ref RightGapBuffer[0],
+                    ref recordBuffer[ByteLength - Alignment.RightByteOffset],
+                    (uint) Alignment.RightByteOffset);
         }
     }
 }
