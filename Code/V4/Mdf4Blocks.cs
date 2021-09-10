@@ -374,9 +374,9 @@ namespace MdfTools.V4
                 {
                     for (uint i = 0; i < mdfDlBlock.BlockCount; i++)
                     {
-                        eqidx++;
                         yield return new DataBlockMap(mdfDlBlock.Links[i + 1], (long) (eqidx * mdfDlBlock.EqualLength),
                             Parser);
+                        eqidx++;
                     }
                 }
                 else

@@ -72,8 +72,9 @@ namespace MdfTools.V4
                 info.SampleCount = (blockByteLength - leftAlignment - rightAlignment) / RecordLength;
                 info.SampleIndex = (blockByteStart + leftAlignment) / RecordLength;
 
-                if (info.BytePosition == 0 && index > 0)
-                    Debugger.Break();
+                Debug.Assert(!(info.BytePosition == 0 && index > 0));
+                Debug.Assert(!(alignment.LeftByteOffset > 0 && info.LeftGapBuffer == null));
+                
 
                 if (rightAlignment > 0)
                 {
